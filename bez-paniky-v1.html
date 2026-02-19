@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prepper / Survival – MVP (Light)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+  <div class="max-w-6xl mx-auto px-4 py-6">
+    <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold">Prepper / Survival</h1>
+        <p class="text-slate-600">Prehľad pripravenosti domácnosti + expirácie + núdzové plány</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button id="btnExport" class="px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-sm">Export JSON</button>
+        <label class="px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-sm cursor-pointer">
+          Import JSON
+          <input id="fileImport" type="file" accept="application/json" class="hidden" />
+        </label>
+        <button id="btnReset" class="px-3 py-2 rounded-xl bg-rose-600 text-white hover:bg-rose-500 text-sm">Reset</button>
+      </div>
+    </header>
+
+    <main class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- Left: Profile / Alerts -->
+      <section class="lg:col-span-1 space-y-4">
+        <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Profil domácnosti</h2>
+            <button id="btnEditProfile" class="text-sm text-sky-700 hover:text-sky-800">Upraviť</button>
+          </div>
+          <div id="profileCard" class="mt-3 text-sm text-slate-800 space-y-1"></div>
+        </div>
+
+        <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-lg font-semibold">Upozornenia (expirácie)</h2>
+            <button id="btnAskNotif" class="text-sm text-sky-700 hover:text-sky-800">Zapnúť notifikácie</button>
+          </div>
+
+          <div class="mt-3 flex items-center gap-2">
+            <label class="text-sm text-slate-700">Upozorniť</label>
+            <select id="alertDays" class="bg-white border border-slate-200 rounded-xl px-2 py-1 text-sm">
+              <option value="7">7 dní vopred</option>
+              <option value="14">14 dní vopred</option>
+              <option value="30" selected>30 dní vopred</option>
+              <option value="60">60 dní vopred</option>
+            </select>
+          </div>
+
+          <div id="alertsBox" class="mt-3 space-y-2"></div>
+          <p class="mt-3 text-xs text-slate-500">
+            Pozn.: Browser notifikácie fungujú len keď je stránka otvorená. Pre “push” mimo stránky treba PWA.
+          </p>
+        </div>
+
+        <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+          <h2 class="text-lg font-semibold">Núdzové plány A / B / C</h2>
+          <p class="text-sm text-slate-600 mt-1">Priprav si texty a kontakty. Odoslanie cez SMS appku v mobile.</p>
+          <div class="mt-3 space-y-3" id="plansBox"></div>
+        </div>
+      </section>
+
+      <!-- Right: Dashboard -->
+      <section class="lg:col-span-2 space-y-4">
+        <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <h2 class="text-lg font-semibold">Prehľad pripravenosti</h2>
+              <p class="text-sm text-slate-600">Celkové skóre je vážený priemer kategórií.</p>
+            </div>
+            <div class="min-w-[240px]">
+              <div class="flex items-center justify-between text-sm text-slate-700">
+                <span>Celkom</span>
+                <span id="overallPct" class="font-semibold text-slate-900">0%</span>
+              </div>
+              <div class="mt-2 h-3 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
+                <div id="overallBar" class="h-3 w-0"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="categoriesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+        <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Detail kategórie</h2>
+            <div class="flex gap-2">
+              <button id="btnAddItem" class="px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-sm">Pridať položku</button>
+            </div>
+          </div>
+
+          <div id="categoryDetail" class="mt-4"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal: Profile -->
+  <div id="modalProfile" class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white border border-slate-200 p-4 shadow-lg">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold">Úvodné nastavenie</h3>
+        <button data-close="modalProfile" class="text-slate-500 hover:text-slate-900">✕</button>
+      </div>
+
+      <form id="profileForm" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
+          <label class="text-sm text-slate-700">Dospelí (13-64 rokov)</label>
+          <input name="adults" type="number" min="0" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" required />
+        </div>
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
+          <label class="text-sm text-slate-700">Deti (1-12 rokov)</label>
+          <input name="kids" type="number" min="0" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" required />
+        </div>
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
+          <label class="text-sm text-slate-700">Dojčatá (0-1 rok)</label>
+          <input name="infants" type="number" min="0" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" required />
+        </div>
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
+          <label class="text-sm text-slate-700">Seniori (65+ rokov)</label>
+          <input name="seniors" type="number" min="0" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" required />
+        </div>
+
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 md:col-span-2">
+          <label class="text-sm text-slate-700">Doba pripravenosti (dni)</label>
+          <input name="prepDays" type="number" min="1" max="30" value="3" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" required />
+          <p class="text-xs text-slate-500 mt-1">Odporúčané minimum: 3 dni. Pre lepšiu prípravu: 7-14 dní.</p>
+        </div>
+
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
+          <label class="text-sm text-slate-700">Pripravenosť</label>
+          <select name="readiness" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2">
+            <option value="minimal">Minimálna</option>
+            <option value="medium" selected>Stredná</option>
+            <option value="high">Vysoká</option>
+          </select>
+        </div>
+
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
+          <label class="text-sm text-slate-700">Typ bývania</label>
+          <select name="housing" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2">
+            <option value="rd">Rodinný dom</option>
+            <option value="rd_cellar">Rodinný dom + pivnica</option>
+            <option value="flat">Byt</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-2 flex items-center justify-between gap-3 mt-2">
+          <p class="text-xs text-slate-500">
+            Tip: MVP ukladá dáta lokálne. Produkcia: účet + cloud sync.
+          </p>
+          <button class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">
+            Uložiť
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Item -->
+  <div id="modalAddItem" class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white border border-slate-200 p-4 shadow-lg">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold">Pridať položku</h3>
+        <button data-close="modalAddItem" class="text-slate-500 hover:text-slate-900">✕</button>
+      </div>
+
+      <form id="addItemForm" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 md:col-span-2">
+          <label class="text-sm text-slate-700">Názov</label>
+          <input name="name" type="text" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" required />
+        </div>
+
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
+          <label class="text-sm text-slate-700">Množstvo (voliteľné)</label>
+          <input name="qty" type="text" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" />
+        </div>
+
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
+          <label class="text-sm text-slate-700">Expirácia (voliteľné)</label>
+          <input name="expiry" type="date" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" />
+        </div>
+
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 md:col-span-2">
+          <label class="text-sm text-slate-700">Odporúčaný odkaz (URL – voliteľné)</label>
+          <input name="link" type="url" placeholder="https://..." class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" />
+          <p class="mt-2 text-xs text-slate-500">
+            Pri položke sa zobrazí ikonka 🔗, ktorá otvorí obchod v novej karte.
+          </p>
+        </div>
+
+        <div class="md:col-span-2 flex items-center justify-between gap-3 mt-2">
+          <p class="text-xs text-slate-500">
+            Položky bez expirácie sa nezobrazia v upozorneniach.
+          </p>
+          <button class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold">
+            Pridať
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------
+    // Storage + defaults
+    // -------------------------
+    const LS_KEY = "prepper_mvp_v2_light";
+
+    const CATEGORIES = [
+      { id: "food_water", name: "Jedlo a voda", weight: 1.2 },
+      { id: "cash", name: "Peniaze (hotovosť)", weight: 0.8 },
+      { id: "medkit", name: "Lekárnička", weight: 1.1 },
+      { id: "hygiene", name: "Hygiena", weight: 0.8 },
+      { id: "gear", name: "Predmety", weight: 1.0 },
+      { id: "docs", name: "Doklady a kontakty", weight: 0.9 },
+      { id: "plans", name: "Núdzový plán A/B/C", weight: 1.2 },
+    ];
+
+    // Default items now include optional `link`
+    const DEFAULT_ITEMS = {
+      food_water: [
+        { name: "Pitná voda (min. 3 dni)", done: false, qty: "", expiry: "", link: "", waterBottles: 0, isWaterItem: true },
+        { name: "Trvanlivé jedlo (min. 3 dni)", done: false, qty: "", expiry: "", link: "" },
+        { name: "Otvarač / varič / palivo", done: false, qty: "", expiry: "", link: "" },
+      ],
+      cash: [
+        { name: "Hotovosť na 3–7 dní", done: false, qty: "", expiry: "", link: "" },
+        { name: "Drobné mince", done: false, qty: "", expiry: "", link: "" },
+      ],
+      medkit: [
+        { name: "Základné lieky proti bolesti", done: false, qty: "", expiry: "", link: "" },
+        { name: "Obväzy, dezinfekcia, rukavice", done: false, qty: "", expiry: "", link: "" },
+        { name: "Lieky na predpis (rezerva)", done: false, qty: "", expiry: "", link: "" },
+      ],
+      hygiene: [
+        { name: "Toaletný papier / vlhčené utierky", done: false, qty: "", expiry: "", link: "" },
+        { name: "Mydlo / dezinfekcia", done: false, qty: "", expiry: "", link: "" },
+      ],
+      gear: [
+        { name: "Baterka + batérie", done: false, qty: "", expiry: "", link: "" },
+        { name: "Powerbanka", done: false, qty: "", expiry: "", link: "" },
+        {
+          name: "Plynový varič Jetboil MiniMo",
+          done: false,
+          qty: "1 ks",
+          expiry: "",
+          link: "https://www.4camping.sk/p/varic-jetboil-minimo/?ppcbee-adtext-variant=RSA&utm_source=google&utm_medium=cpc&utm_campaign=3-(SK)-SEA-PRO%20new&utm_id=20619195074&gad_source=1&gad_campaignid=20619195074&gbraid=0AAAAADb_NTWwcmzAbJRfPNibpvQIGyglG&gclid=CjwKCAiAncvMBhBEEiwA9GU_fmm9ori8pscp3F64134By6lCwmoPqem5YbNp7GgiP05gMgSpqGrVFRoCesgQAvD_BwE"
+        },
+      ],
+      docs: [
+        { name: "Kópie dokladov (papier/USB)", done: false, qty: "", expiry: "", link: "" },
+        { name: "Zoznam kontaktov (offline)", done: false, qty: "", expiry: "", link: "" },
+      ],
+      plans: [
+        { name: "Miesto stretnutia (A)", done: false, qty: "", expiry: "", link: "" },
+        { name: "Záložné miesto (B)", done: false, qty: "", expiry: "", link: "" },
+        { name: "Evakuačná trasa (C)", done: false, qty: "", expiry: "", link: "" },
+      ],
+    };
+
+    const DEFAULT_STATE = {
+      profile: null,
+      selectedCategoryId: CATEGORIES[0].id,
+      alertDays: 30,
+      waterInventory: {
+        bottles15: 0,
+        bottles05: 0,
+        otherWater: 0
+      },
+      plans: {
+        A: { message: "Sme v poriadku. Ideme na miesto A: _____.", phones: "" },
+        B: { message: "Presúvame sa na miesto B: _____.", phones: "" },
+        C: { message: "Evakuácia. Ideme na miesto C: _____.", phones: "" },
+      },
+      items: structuredClone(DEFAULT_ITEMS),
+      notified: {}
+    };
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (!raw) return structuredClone(DEFAULT_STATE);
+        const parsed = JSON.parse(raw);
+
+        // Ensure new `link` exists on items (migration safe)
+        const mergedItems = { ...structuredClone(DEFAULT_STATE.items), ...(parsed.items || {}) };
+        for (const cid of Object.keys(mergedItems)) {
+          mergedItems[cid] = (mergedItems[cid] || []).map(it => ({
+            link: "",
+            waterBottles: 0,
+            isWaterItem: false,
+            ...it
+          }));
+        }
+
+        return {
+          ...structuredClone(DEFAULT_STATE),
+          ...parsed,
+          waterInventory: { ...structuredClone(DEFAULT_STATE.waterInventory), ...(parsed.waterInventory || {}) },
+          items: mergedItems,
+          plans: { ...structuredClone(DEFAULT_STATE.plans), ...(parsed.plans || {}) }
+        };
+      } catch {
+        return structuredClone(DEFAULT_STATE);
+      }
+    }
+
+    let state = loadState();
+
+    function saveState() {
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+    }
+
+    // -------------------------
+    // Helpers
+    // -------------------------
+    const $ = (id) => document.getElementById(id);
+    const fmt = (n) => Math.round(n) + "%";
+
+    function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+
+    // Map 0..100 -> red(0) to green(120) in HSL
+    function colorForPct(pct) {
+      const t = clamp01((pct || 0) / 100);
+      const hue = 0 + (120 * t);
+      return `hsl(${hue} 80% 40%)`;
+    }
+
+    function bgTintForPct(pct) {
+      const t = clamp01((pct || 0) / 100);
+      const hue = 0 + (120 * t);
+      return `hsl(${hue} 80% 95%)`;
+    }
+
+    function emojiForPct(pct) {
+      const p = Math.round(pct || 0);
+      if (p < 25) return "😟";      // otrhanec vibe
+      if (p < 50) return "😐";      // neutral
+      if (p < 75) return "🙂";      // ok
+      if (p < 100) return "😄";     // strong
+      return "🛡️";                 // “rytier / shield” at 100%
+    }
+
+    function rankForPct(pct) {
+      const p = Math.round(pct || 0);
+      if (p < 25) return "Otrhanec";
+      if (p < 50) return "Učeň";
+      if (p < 75) return "Strážca";
+      if (p < 100) return "Bojovník";
+      return "Rytier";
+    }
+
+    function openModal(id) {
+      const el = $(id);
+      el.classList.remove("hidden");
+      el.classList.add("flex");
+    }
+
+    function closeModal(id) {
+      const el = $(id);
+      el.classList.add("hidden");
+      el.classList.remove("flex");
+    }
+
+    function parsePhones(str) {
+      return (str || "").split(",").map(s => s.trim()).filter(Boolean);
+    }
+
+    function daysUntil(dateStr) {
+      const d = new Date(dateStr + "T00:00:00");
+      const now = new Date();
+      const ms = d - now;
+      return Math.ceil(ms / (1000 * 60 * 60 * 24));
+    }
+
+    function itemId(catId, idx) { return catId + ":" + idx; }
+
+    function isValidHttpUrl(u) {
+      try {
+        const url = new URL(u);
+        return url.protocol === "http:" || url.protocol === "https:";
+      } catch { return false; }
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    // Vypočíta koľko % je splnená položka vody
+    function calculateWaterItemCompletion(item) {
+      if (!item.isWaterItem || !state.profile) return item.done ? 100 : 0;
+      
+      const p = state.profile;
+      const days = p.prepDays || 3;
+      const waterAdults = (p.adults || 0) * 2.0 * days;
+      const waterKids = (p.kids || 0) * 1.5 * days;
+      const waterInfants = (p.infants || 0) * 1.0 * days;
+      const waterSeniors = (p.seniors || 0) * 2.0 * days;
+      const totalWaterNeeded = waterAdults + waterKids + waterInfants + waterSeniors;
+      
+      const currentWater = (item.waterBottles || 0) * 1.5;
+      
+      if (totalWaterNeeded === 0) return 0;
+      return Math.min(100, (currentWater / totalWaterNeeded) * 100);
+    }
+
+    // -------------------------
+    // Scoring
+    // -------------------------
+    function categoryScore(catId) {
+      const items = state.items[catId] || [];
+      if (!items.length) return 0;
+      
+      let totalScore = 0;
+      items.forEach(item => {
+        if (item.isWaterItem) {
+          // Pre položku vody počítaj percentuálne splnenie
+          totalScore += calculateWaterItemCompletion(item);
+        } else {
+          // Pre ostatné položky: hotové = 100%, nehotové = 0%
+          totalScore += item.done ? 100 : 0;
+        }
+      });
+      
+      return totalScore / items.length;
+    }
+
+    function overallScore() {
+      let wSum = 0, sum = 0;
+      for (const c of CATEGORIES) {
+        const s = categoryScore(c.id);
+        sum += s * c.weight;
+        wSum += c.weight;
+      }
+      return wSum ? (sum / wSum) : 0;
+    }
+
+    // -------------------------
+    // Render
+    // -------------------------
+    function renderProfileCard() {
+      const box = $("profileCard");
+      if (!state.profile) {
+        box.innerHTML = `<p class="text-slate-600">Profil ešte nie je nastavený.</p>
+          <button class="mt-3 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold" id="btnStart">
+            Spustiť nastavenie
+          </button>`;
+        setTimeout(() => {
+          const b = $("btnStart");
+          if (b) b.onclick = () => openModal("modalProfile");
+        }, 0);
+        return;
+      }
+
+      const p = state.profile;
+      const readinessLabel = p.readiness === "minimal" ? "Minimálna" : p.readiness === "high" ? "Vysoká" : "Stredná";
+      const housingLabel = p.housing === "rd_cellar" ? "RD + pivnica" : p.housing === "flat" ? "Byt" : "Rodinný dom";
+      const days = p.prepDays || 3;
+      
+      // Výpočet vody podľa WHO štandardov a českej príručky "72 HODIN"
+      const waterAdults = (p.adults || 0) * 2.0 * days;
+      const waterKids = (p.kids || 0) * 1.5 * days;
+      const waterInfants = (p.infants || 0) * 1.0 * days;
+      const waterSeniors = (p.seniors || 0) * 2.0 * days;
+      const totalWater = waterAdults + waterKids + waterInfants + waterSeniors;
+
+      box.innerHTML = `
+        <div class="grid grid-cols-2 gap-2">
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-2">
+            <div class="text-xs text-slate-500">Dospelí</div>
+            <div class="font-semibold">${p.adults || 0}</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-2">
+            <div class="text-xs text-slate-500">Deti</div>
+            <div class="font-semibold">${p.kids || 0}</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-2">
+            <div class="text-xs text-slate-500">Dojčatá</div>
+            <div class="font-semibold">${p.infants || 0}</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-2">
+            <div class="text-xs text-slate-500">Seniori</div>
+            <div class="font-semibold">${p.seniors || 0}</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-2">
+            <div class="text-xs text-slate-500">Príprava na</div>
+            <div class="font-semibold">${days} dní</div>
+          </div>
+          <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-2">
+            <div class="text-xs text-emerald-700">💧 Potreba vody</div>
+            <div class="font-semibold text-emerald-900">${totalWater.toFixed(1)} L</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-2">
+            <div class="text-xs text-slate-500">Bývanie</div>
+            <div class="font-semibold">${housingLabel}</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-2">
+            <div class="text-xs text-slate-500">Pripravenosť</div>
+            <div class="font-semibold">${readinessLabel}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function setBar(el, pct) {
+      const w = Math.max(0, Math.min(100, pct));
+      el.style.width = w + "%";
+      el.style.background = colorForPct(pct);
+    }
+
+    function renderOverall() {
+      const pct = overallScore();
+      $("overallPct").textContent = fmt(pct);
+      setBar($("overallBar"), pct);
+    }
+
+    function renderCategories() {
+      const grid = $("categoriesGrid");
+      grid.innerHTML = "";
+
+      for (const c of CATEGORIES) {
+        const pct = categoryScore(c.id);
+        const isSel = state.selectedCategoryId === c.id;
+
+        const card = document.createElement("button");
+        card.className = `text-left rounded-2xl border p-4 transition shadow-sm
+          ${isSel ? "bg-white border-sky-300" : "bg-white border-slate-200 hover:border-slate-300"}`;
+
+        const col = colorForPct(pct);
+        const tint = bgTintForPct(pct);
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="text-base font-semibold">${c.name}</div>
+              <div class="text-sm text-slate-600 mt-1">${fmt(pct)} pripravenosť • <span class="font-semibold">${rankForPct(pct)}</span></div>
+            </div>
+
+            <div class="h-11 w-11 rounded-full border flex items-center justify-center font-bold"
+                 style="border-color:${col}; background:${tint}; color:${col};">
+              <span class="text-xl leading-none" title="${rankForPct(pct)}">${emojiForPct(pct)}</span>
+            </div>
+          </div>
+
+          <div class="mt-3 h-2 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
+            <div class="h-2" style="width:${Math.max(0, Math.min(100, pct))}%; background:${col};"></div>
+          </div>
+        `;
+
+        card.onclick = () => {
+          state.selectedCategoryId = c.id;
+          saveState();
+          renderAll();
+        };
+
+        grid.appendChild(card);
+      }
+    }
+
+    function renderCategoryDetail() {
+      const catId = state.selectedCategoryId;
+      const cat = CATEGORIES.find(c => c.id === catId);
+      const items = state.items[catId] || [];
+
+      const pct = categoryScore(catId);
+      const wrap = document.createElement("div");
+
+      wrap.innerHTML = `
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <div class="text-xl font-bold">${cat.name}</div>
+            <div class="text-sm text-slate-600">${items.filter(i=>i.done).length} / ${items.length} hotovo</div>
+          </div>
+          <div class="min-w-[260px]">
+            <div class="flex items-center justify-between text-sm text-slate-700">
+              <span>Kategória</span>
+              <span class="font-semibold">${fmt(pct)} • ${rankForPct(pct)}</span>
+            </div>
+            <div class="mt-2 h-3 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
+              <div id="catBar" class="h-3"></div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const list = document.createElement("div");
+      list.className = "mt-4 space-y-2";
+
+      if (!items.length) {
+        list.innerHTML = `<p class="text-slate-600 text-sm">Zatiaľ bez položiek.</p>`;
+      } else {
+        items.forEach((it, idx) => {
+          const id = itemId(catId, idx);
+          
+          // ŠPECIÁLNE VYKRESLENIE PRE POLOŽKU VODY
+          if (it.isWaterItem && state.profile) {
+            const p = state.profile;
+            const days = p.prepDays || 3;
+            const waterAdults = (p.adults || 0) * 2.0 * days;
+            const waterKids = (p.kids || 0) * 1.5 * days;
+            const waterInfants = (p.infants || 0) * 1.0 * days;
+            const waterSeniors = (p.seniors || 0) * 2.0 * days;
+            const totalWaterNeeded = waterAdults + waterKids + waterInfants + waterSeniors;
+            const currentWater = (it.waterBottles || 0) * 1.5;
+            const waterPct = calculateWaterItemCompletion(it);
+            
+            let progressColor = "bg-rose-500";
+            if (waterPct >= 100) progressColor = "bg-emerald-500";
+            else if (waterPct >= 50) progressColor = "bg-amber-500";
+
+            const row = document.createElement("div");
+            row.className = "rounded-xl bg-gradient-to-br from-sky-50 to-blue-50 border-2 border-sky-200 p-4 shadow-sm";
+            row.innerHTML = `
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex items-start gap-3 flex-1">
+                  <div class="mt-1">💧</div>
+                  <div class="flex-1">
+                    <div class="font-bold text-lg text-sky-900">
+                      ${escapeHtml(it.name)}
+                    </div>
+                    <div class="text-sm text-sky-700 mt-1">
+                      ${currentWater.toFixed(1)} L / ${totalWaterNeeded.toFixed(1)} L potrebných
+                    </div>
+                  </div>
+                </div>
+                <button class="text-sky-700 hover:text-sky-900 text-sm px-3 py-1 rounded-lg bg-white border border-sky-300 hover:bg-sky-50" 
+                        id="btnWaterInfo_${idx}" 
+                        title="Informácie o výpočte">
+                  ℹ️ Info
+                </button>
+              </div>
+
+              <div class="mb-3">
+                <div class="flex items-center justify-between text-sm mb-2">
+                  <span class="text-sky-800 font-medium">Pripravenosť</span>
+                  <span class="text-lg font-bold ${waterPct >= 100 ? 'text-emerald-600' : waterPct >= 50 ? 'text-amber-600' : 'text-rose-600'}">
+                    ${Math.round(waterPct)}%
+                  </span>
+                </div>
+                <div class="h-3 rounded-full bg-white border border-sky-200 overflow-hidden">
+                  <div class="${progressColor} h-3 transition-all duration-500" style="width: ${Math.min(waterPct, 100)}%"></div>
+                </div>
+                <p class="text-xs text-sky-600 mt-1">
+                  ${waterPct < 50 ? '⚠️ Nedostatočná zásoba' : waterPct < 100 ? '⏳ Čiastočne pripravené' : '✅ Plne pripravené'}
+                </p>
+              </div>
+
+              <div class="rounded-xl bg-white border border-sky-200 p-3">
+                <label class="text-sm text-sky-800 font-medium block mb-2">
+                  Evidencia fliaš 1.5 L
+                </label>
+                <div class="flex items-center gap-3">
+                  <input type="number" 
+                         min="0" 
+                         value="${it.waterBottles || 0}" 
+                         class="flex-1 px-3 py-2 rounded-xl border-2 border-sky-200 focus:border-sky-400 focus:outline-none text-lg font-semibold" 
+                         id="waterBottles_${idx}"
+                         placeholder="0" />
+                  <span class="text-sm text-slate-600 whitespace-nowrap">ks = ${currentWater.toFixed(1)} L</span>
+                </div>
+              </div>
+
+              <div class="mt-3 rounded-xl bg-sky-100 border border-sky-300 p-3 text-xs text-sky-800">
+                <strong>💡 Tip:</strong> Odporúča sa mať minimálne 2/3 celkovej potreby v balených fľašiach 1.5L.
+              </div>
+            `;
+            list.appendChild(row);
+
+            // Bind events after render
+            setTimeout(() => {
+              const input = document.getElementById(`waterBottles_${idx}`);
+              const infoBtn = document.getElementById(`btnWaterInfo_${idx}`);
+              
+              if (input) {
+                input.onchange = () => {
+                  state.items[catId][idx].waterBottles = Number(input.value) || 0;
+                  saveState();
+                  renderAll();
+                };
+              }
+
+              if (infoBtn) {
+                infoBtn.onclick = () => {
+                  alert(`Výpočet potreby vody (podľa WHO a českej príručky "72 HODIN"):
+
+Dospelí (13-64 rokov): 2 L/deň
+Deti (1-12 rokov): 1.5 L/deň  
+Dojčatá (0-1 rok): 1 L/deň
+Seniori (65+ rokov): 2 L/deň
+
+Vzorec: počet osôb × potreba/deň × ${days} dní
+
+Vaša domácnosť:
+• Dospelí: ${p.adults || 0} × 2 L × ${days} dní = ${waterAdults.toFixed(1)} L
+• Deti: ${p.kids || 0} × 1.5 L × ${days} dní = ${waterKids.toFixed(1)} L
+• Dojčatá: ${p.infants || 0} × 1 L × ${days} dní = ${waterInfants.toFixed(1)} L
+• Seniori: ${p.seniors || 0} × 2 L × ${days} dní = ${waterSeniors.toFixed(1)} L
+
+Celkom potrebujete: ${totalWaterNeeded.toFixed(1)} L
+
+Aktuálne máte: ${currentWater.toFixed(1)} L (${it.waterBottles || 0} fliaš × 1.5 L)
+Chýba vám ešte: ${Math.max(0, totalWaterNeeded - currentWater).toFixed(1)} L`);
+                };
+              }
+            }, 0);
+            
+            return; // Skip normal rendering
+          }
+
+          // NORMÁLNE VYKRESLENIE PRE OSTATNÉ POLOŽKY
+          const exp = it.expiry ? daysUntil(it.expiry) : null;
+
+          const expBadge =
+            it.expiry
+              ? (exp < 0
+                ? `<span class="ml-2 text-xs px-2 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">EXPIROVANÉ</span>`
+                : (exp <= state.alertDays
+                  ? `<span class="ml-2 text-xs px-2 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">exp. za ${exp} dní</span>`
+                  : `<span class="ml-2 text-xs px-2 py-1 rounded-full bg-slate-50 text-slate-700 border border-slate-200">exp. za ${exp} dní</span>`))
+              : "";
+
+          const linkIcon = (it.link && isValidHttpUrl(it.link))
+            ? `<a href="${escapeHtml(it.link)}" target="_blank" rel="noopener noreferrer"
+                 class="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200"
+                 title="Otvoriť odporúčaný obchod">
+                 🔗
+               </a>`
+            : `<span class="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-slate-50 border border-slate-200 text-slate-300"
+                     title="Bez odkazu">↗</span>`;
+
+          const row = document.createElement("div");
+          row.className = "rounded-xl bg-white border border-slate-200 p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3 shadow-sm";
+          row.innerHTML = `
+            <div class="flex items-start gap-3">
+              <input type="checkbox" class="mt-1 h-5 w-5 accent-emerald-600" ${it.done ? "checked" : ""} data-toggle="${id}" />
+              <div>
+                <div class="font-semibold ${it.done ? "line-through text-slate-400" : ""}">
+                  ${escapeHtml(it.name)} ${expBadge}
+                </div>
+                <div class="text-sm text-slate-600 mt-1">
+                  ${it.qty ? `Množstvo: <span class="text-slate-900">${escapeHtml(it.qty)}</span>` : "—"}
+                  ${it.expiry ? ` • Expirácia: <span class="text-slate-900">${escapeHtml(it.expiry)}</span>` : ""}
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              ${linkIcon}
+              <button class="px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-sm" data-edit="${id}">Upraviť</button>
+              <button class="px-3 py-2 rounded-xl bg-rose-600 text-white hover:bg-rose-500 text-sm" data-del="${id}">Zmazať</button>
+            </div>
+          `;
+          list.appendChild(row);
+        });
+      }
+
+      wrap.appendChild(list);
+
+      $("categoryDetail").innerHTML = "";
+      $("categoryDetail").appendChild(wrap);
+
+      // set category bar color
+      const catBar = document.getElementById("catBar");
+      setBar(catBar, pct);
+
+      // bind actions
+      document.querySelectorAll("[data-toggle]").forEach(el => {
+        el.onchange = (e) => {
+          const key = e.target.getAttribute("data-toggle");
+          const [cid, idxStr] = key.split(":");
+          const idx = Number(idxStr);
+          state.items[cid][idx].done = e.target.checked;
+          saveState();
+          renderAll();
+        };
+      });
+
+      document.querySelectorAll("[data-del]").forEach(el => {
+        el.onclick = () => {
+          const key = el.getAttribute("data-del");
+          const [cid, idxStr] = key.split(":");
+          const idx = Number(idxStr);
+          state.items[cid].splice(idx, 1);
+          saveState();
+          renderAll();
+        };
+      });
+
+      document.querySelectorAll("[data-edit]").forEach(el => {
+        el.onclick = () => {
+          const key = el.getAttribute("data-edit");
+          const [cid, idxStr] = key.split(":");
+          const idx = Number(idxStr);
+          const item = state.items[cid][idx];
+
+          const name = prompt("Názov", item.name);
+          if (name === null) return;
+
+          const qty = prompt("Množstvo (napr. 10l / 5 ks)", item.qty || "") ?? item.qty;
+          const expiry = prompt("Expirácia (YYYY-MM-DD alebo prázdne)", item.expiry || "") ?? item.expiry;
+          const link = prompt("Odporúčaný odkaz (URL alebo prázdne)", item.link || "") ?? item.link;
+
+          item.name = name.trim() || item.name;
+          item.qty = (qty || "").trim();
+          item.expiry = (expiry || "").trim();
+          item.link = (link || "").trim();
+
+          saveState();
+          renderAll();
+        };
+      });
+    }
+
+    function renderPlans() {
+      const box = $("plansBox");
+      box.innerHTML = "";
+
+      ["A","B","C"].forEach(letter => {
+        const plan = state.plans[letter];
+        const card = document.createElement("div");
+        card.className = "rounded-xl bg-slate-50 border border-slate-200 p-3";
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="font-semibold">Plán ${letter}</div>
+            <button class="text-sm text-sky-700 hover:text-sky-800" data-editplan="${letter}">Upraviť</button>
+          </div>
+          <div class="text-sm text-slate-700 mt-2">
+            <div><span class="text-slate-500">Kontakty:</span> ${escapeHtml(plan.phones || "—")}</div>
+            <div class="mt-1"><span class="text-slate-500">Správa:</span> ${escapeHtml(plan.message)}</div>
+          </div>
+          <div class="mt-3 flex gap-2">
+            <button class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold" data-sms="${letter}">
+              Odoslať SMS
+            </button>
+            <button class="px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-sm" data-copy="${letter}">
+              Skopírovať text
+            </button>
+          </div>
+          <p class="mt-2 text-xs text-slate-500">Otvorí SMS aplikáciu (na mobile funguje najlepšie).</p>
+        `;
+        box.appendChild(card);
+      });
+
+      document.querySelectorAll("[data-editplan]").forEach(el => {
+        el.onclick = () => {
+          const letter = el.getAttribute("data-editplan");
+          const p = state.plans[letter];
+          const phones = prompt("Telefónne čísla (oddelené čiarkou)", p.phones || "");
+          if (phones === null) return;
+          const msg = prompt("Text správy", p.message || "");
+          if (msg === null) return;
+          state.plans[letter] = { phones: phones.trim(), message: msg.trim() };
+          saveState();
+          renderPlans();
+        };
+      });
+
+      document.querySelectorAll("[data-copy]").forEach(el => {
+        el.onclick = async () => {
+          const letter = el.getAttribute("data-copy");
+          const msg = state.plans[letter].message || "";
+          try {
+            await navigator.clipboard.writeText(msg);
+            alert("Text skopírovaný.");
+          } catch {
+            alert("Nepodarilo sa kopírovať. Skús manuálne.");
+          }
+        };
+      });
+
+      document.querySelectorAll("[data-sms]").forEach(el => {
+        el.onclick = () => {
+          const letter = el.getAttribute("data-sms");
+          const { phones, message } = state.plans[letter];
+          const list = parsePhones(phones);
+          if (!list.length) { alert("Doplň kontakty pre plán " + letter); return; }
+          const to = list.join(",");
+          const uri = "sms:" + encodeURIComponent(to) + "?&body=" + encodeURIComponent(message || "");
+          window.location.href = uri;
+        };
+      });
+    }
+
+    function renderAlerts() {
+      const box = $("alertsBox");
+      box.innerHTML = "";
+
+      const alertDays = Number(state.alertDays || 30);
+      const alerts = [];
+
+      for (const c of CATEGORIES) {
+        const items = state.items[c.id] || [];
+        items.forEach((it, idx) => {
+          if (!it.expiry) return;
+          const d = daysUntil(it.expiry);
+          if (d <= alertDays) {
+            alerts.push({
+              catId: c.id,
+              catName: c.name,
+              idx,
+              name: it.name,
+              qty: it.qty,
+              expiry: it.expiry,
+              days: d
+            });
+          }
+        });
+      }
+
+      alerts.sort((a,b) => a.days - b.days);
+
+      if (!alerts.length) {
+        box.innerHTML = `<p class="text-sm text-slate-600">Žiadne expirácie v najbližších ${alertDays} dňoch.</p>`;
+        return;
+      }
+
+      alerts.slice(0, 8).forEach(a => {
+        const isExpired = a.days < 0;
+        const pill = isExpired
+          ? "bg-rose-50 border-rose-200 text-rose-700"
+          : "bg-amber-50 border-amber-200 text-amber-800";
+
+        const row = document.createElement("button");
+        row.className = `w-full text-left rounded-xl border p-3 bg-white hover:bg-slate-50 border-slate-200`;
+        row.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="font-semibold">${escapeHtml(a.name)}</div>
+              <div class="text-xs text-slate-500 mt-1">${escapeHtml(a.catName)} • ${escapeHtml(a.expiry)} ${a.qty ? "• " + escapeHtml(a.qty) : ""}</div>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full border ${pill}">
+              ${isExpired ? "EXPIROVANÉ" : "za " + a.days + " dní"}
+            </span>
+          </div>
+        `;
+        row.onclick = () => {
+          state.selectedCategoryId = a.catId;
+          saveState();
+          renderAll();
+        };
+        box.appendChild(row);
+      });
+    }
+
+    function renderAll() {
+      renderProfileCard();
+      renderOverall();
+      renderCategories();
+      renderCategoryDetail();
+      renderPlans();
+      renderAlerts();
+    }
+
+    // -------------------------
+    // Notifications (basic)
+    // -------------------------
+    function maybeNotify() {
+      if (!("Notification" in window)) return;
+      if (Notification.permission !== "granted") return;
+
+      const todayISO = new Date().toISOString().slice(0,10);
+      const alertDays = Number(state.alertDays || 30);
+
+      for (const c of CATEGORIES) {
+        const items = state.items[c.id] || [];
+        items.forEach((it, idx) => {
+          if (!it.expiry) return;
+          const d = daysUntil(it.expiry);
+          if (d > alertDays) return;
+
+          const key = itemId(c.id, idx);
+          if (state.notified[key] === todayISO) return;
+
+          const title = d < 0 ? "Expirácia – EXPIROVANÉ" : "Expirácia – blíži sa";
+          const body = `${it.name} (${c.name}) • ${it.expiry}${d < 0 ? "" : " • za " + d + " dní"}`;
+          new Notification(title, { body });
+
+          state.notified[key] = todayISO;
+        });
+      }
+      saveState();
+    }
+
+    // -------------------------
+    // Events
+    // -------------------------
+    $("btnEditProfile").onclick = () => openModal("modalProfile");
+    document.querySelectorAll("[data-close]").forEach(btn => { btn.onclick = () => closeModal(btn.getAttribute("data-close")); });
+
+    $("profileForm").onsubmit = (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+
+      state.profile = {
+        adults: Number(fd.get("adults") || 0),
+        kids: Number(fd.get("kids") || 0),
+        infants: Number(fd.get("infants") || 0),
+        seniors: Number(fd.get("seniors") || 0),
+        prepDays: Number(fd.get("prepDays") || 3),
+        readiness: String(fd.get("readiness") || "medium"),
+        housing: String(fd.get("housing") || "flat"),
+      };
+
+      if (state.profile.readiness === "high") {
+        if (!state.items.gear.find(x => x.name.includes("Náhradné svetlo"))) {
+          state.items.gear.push({ name: "Náhradné svetlo / čelovka", done: false, qty: "", expiry: "", link: "" });
+        }
+      }
+
+      saveState();
+      closeModal("modalProfile");
+      renderAll();
+    };
+
+    $("btnAddItem").onclick = () => openModal("modalAddItem");
+
+    $("addItemForm").onsubmit = (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const name = String(fd.get("name") || "").trim();
+      const qty = String(fd.get("qty") || "").trim();
+      const expiry = String(fd.get("expiry") || "").trim();
+      const link = String(fd.get("link") || "").trim();
+
+      if (!name) return;
+
+      const cid = state.selectedCategoryId;
+      state.items[cid] = state.items[cid] || [];
+      state.items[cid].push({ name, qty, expiry, done: false, link });
+
+      saveState();
+      closeModal("modalAddItem");
+      e.target.reset();
+      renderAll();
+    };
+
+    $("alertDays").value = String(state.alertDays || 30);
+    $("alertDays").onchange = (e) => {
+      state.alertDays = Number(e.target.value);
+      saveState();
+      renderAlerts();
+      maybeNotify();
+    };
+
+    $("btnAskNotif").onclick = async () => {
+      if (!("Notification" in window)) { alert("Tento prehliadač nepodporuje notifikácie."); return; }
+      const perm = await Notification.requestPermission();
+      if (perm === "granted") {
+        alert("Notifikácie zapnuté. Upozornenia sa budú zobrazovať pri otvorenej stránke.");
+        maybeNotify();
+      } else {
+        alert("Notifikácie neboli povolené.");
+      }
+    };
+
+    $("btnReset").onclick = () => {
+      if (!confirm("Naozaj resetovať všetky dáta?")) return;
+      localStorage.removeItem(LS_KEY);
+      state = loadState();
+      renderAll();
+      openModal("modalProfile");
+    };
+
+    $("btnExport").onclick = () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "prepper-export.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    $("fileImport").onchange = async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const text = await file.text();
+      try {
+        const imported = JSON.parse(text);
+        state = {
+          ...structuredClone(DEFAULT_STATE),
+          ...imported,
+          items: { ...structuredClone(DEFAULT_STATE.items), ...(imported.items || {}) },
+          plans: { ...structuredClone(DEFAULT_STATE.plans), ...(imported.plans || {}) }
+        };
+
+        // ensure link
+        for (const cid of Object.keys(state.items || {})) {
+          state.items[cid] = (state.items[cid] || []).map(it => ({ link: "", ...it }));
+        }
+
+        saveState();
+        renderAll();
+        alert("Import hotový.");
+      } catch {
+        alert("Nepodarilo sa importovať JSON.");
+      } finally {
+        e.target.value = "";
+      }
+    };
+
+    // -------------------------
+    // Boot
+    // -------------------------
+    renderAll();
+    if (!state.profile) openModal("modalProfile");
+
+    setInterval(() => { renderAlerts(); maybeNotify(); }, 60 * 1000);
+    maybeNotify();
+  </script>
+</body>
+</html>
