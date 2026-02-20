@@ -777,8 +777,11 @@
   }
 
   function colorForPct(p) {
-    const h = p >= 100 ? 145 : p > 50 ? 80 : p > 25 ? 40 : 10;
-    return `hsl(${h} 70% 38%)`;
+    // Plynulý prechod: 0% = červená (hsl 0), 100% = zelená (hsl 120)
+    const h = Math.round((Math.min(100, Math.max(0, p)) / 100) * 120);
+    const s = 75;
+    const l = p < 15 ? 42 : p > 85 ? 36 : 38;
+    return `hsl(${h} ${s}% ${l}%)`;
   }
 
   function rankForPct(p) {
@@ -942,7 +945,7 @@
           const total = ((p.adults||0)*2 + (p.kids||0)*1.5 + (p.infants||0)*1 + (p.seniors||0)*2) * d;
           const current = (it.waterBottles||0) * 1.5;
           const wpct = calcWaterCompletion(it);
-          const wCol = wpct >= 100 ? "var(--c-green)" : wpct >= 50 ? "#d97706" : "#dc2626";
+          const wCol = colorForPct(wpct);
 
           // Výpočet na koľko dní/hodín vydrží aktuálna zásoba
           const dailyNeed = ((p.adults||0)*2 + (p.kids||0)*1.5 + (p.infants||0)*1 + (p.seniors||0)*2) * (p.readinessCoeff||1.0);
@@ -982,21 +985,21 @@
               <span style="font-size:1.25rem; font-weight:800; color:${wCol}; flex-shrink:0;">${Math.round(wpct)}%</span>
             </div>
 
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.625rem; margin-bottom:0.875rem;">
+            <div style="display:grid; grid-template-columns:1fr auto; gap:0.625rem; margin-bottom:0.875rem; align-items:stretch;">
               <div style="background:rgba(255,255,255,0.7); border-radius:0.625rem; padding:0.625rem 0.75rem;">
                 <div style="font-size:0.7rem; color:#3b82f6; font-weight:600; margin-bottom:0.2rem; text-transform:uppercase; letter-spacing:0.04em;">Zásoby</div>
                 <div style="font-size:0.9rem; font-weight:700; color:#1e3a8a;">${litreSklon(current)}</div>
-                <div style="font-size:0.72rem; color:#3b82f6;">z ${litreSklon(total)} na ${d} ${d===1?"deň":d<5?"dni":"dní"}</div>
+                <div style="font-size:0.72rem; color:#3b82f6;">z potrebných ${litreSklon(total)} na ${d} ${d===1?"deň":d<5?"dni":"dní"}</div>
               </div>
-              <div style="background:${durBg}; border:1px solid ${durBorder}; border-radius:0.625rem; padding:0.625rem 0.75rem;">
-                <div style="font-size:0.7rem; color:${durColor}; font-weight:600; margin-bottom:0.2rem; text-transform:uppercase; letter-spacing:0.04em;">Vydrží</div>
-                <div style="font-size:0.9rem; font-weight:700; color:${durColor};">${durText}</div>
-                <div style="font-size:0.72rem; color:${durColor}; opacity:0.8;">pri ${dailyNeed.toFixed(1)} l/deň</div>
+              <div style="background:${durBg}; border:1px solid ${durBorder}; border-radius:0.625rem; padding:0.625rem 0.875rem; min-width:0; white-space:nowrap;">
+                <div style="font-size:0.68rem; color:${durColor}; font-weight:600; margin-bottom:0.25rem; text-transform:uppercase; letter-spacing:0.04em;">Vydrží vám na</div>
+                <div style="font-size:0.95rem; font-weight:800; color:${durColor}; line-height:1.2;">${durText}</div>
+                <div style="font-size:0.68rem; color:${durColor}; opacity:0.75; margin-top:0.2rem;">pri spotrebe ${dailyNeed.toFixed(1)} l/deň</div>
               </div>
             </div>
 
             <div class="progress-bar" style="margin-bottom:0.875rem; height:10px;">
-              <div class="progress-fill" style="width:${Math.min(100,wpct)}%; background:${wCol};"></div>
+              <div class="progress-fill" style="width:${Math.min(100,wpct)}%; background:${colorForPct(wpct)};"></div>
             </div>
 
             <div style="display:flex; align-items:center; gap:0.75rem;">
@@ -1149,12 +1152,10 @@
   }
 
 
-  // Skloňovanie slova "liter" podľa hodnoty
+  // Zobrazenie litrov - vždy len číslo + "l"
   function litreSklon(val) {
     const n = parseFloat(val);
-    if (n === 1) return n.toFixed(1) + " liter";
-    if (n >= 2 && n <= 4 && Number.isInteger(n)) return n.toFixed(1) + " litre";
-    return n.toFixed(1) + " litra";
+    return n.toFixed(1) + " l";
   }
 
   function renderAll() {
