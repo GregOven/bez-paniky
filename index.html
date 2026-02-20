@@ -3,1121 +3,1043 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prepper / Survival – MVP (Light)</title>
+  <title>Bez Paniky – Civilná pripravenosť domácnosti</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --c-bg: #f5f3ee;
+      --c-surface: #ffffff;
+      --c-border: #e2ddd5;
+      --c-text: #1a1714;
+      --c-muted: #6b6560;
+      --c-accent: #d4501a;
+      --c-accent-light: #fdf0eb;
+      --c-green: #2a7a4b;
+      --c-green-light: #eaf4ee;
+      --c-amber: #b45309;
+      --c-amber-light: #fef3c7;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--c-bg); color: var(--c-text); }
+    h1, h2, h3, .font-display { font-family: 'Syne', sans-serif; }
+
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--c-bg);
+      padding: 2rem;
+    }
+    .login-card {
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: 1.5rem;
+      padding: 3rem 2.5rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    .logo-mark {
+      width: 64px; height: 64px;
+      background: var(--c-accent);
+      border-radius: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 1.75rem;
+    }
+    .btn-google {
+      display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      border: 1.5px solid var(--c-border);
+      border-radius: 0.875rem;
+      background: var(--c-surface);
+      color: var(--c-text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-google:hover { background: var(--c-bg); border-color: #c5c0b8; }
+    .btn-google svg { flex-shrink: 0; }
+
+    .app-header {
+      background: var(--c-surface);
+      border-bottom: 1px solid var(--c-border);
+      padding: 0 1.5rem;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .app-header-logo { display: flex; align-items: center; gap: 0.75rem; }
+    .app-logo-sm {
+      width: 32px; height: 32px;
+      background: var(--c-accent);
+      border-radius: 0.5rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; color: white;
+    }
+
+    .card {
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: 1.25rem;
+      padding: 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .progress-bar { height: 8px; border-radius: 999px; background: #ede9e3; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 999px; transition: width 0.5s ease; }
+
+    .cat-card {
+      background: var(--c-surface);
+      border: 1.5px solid var(--c-border);
+      border-radius: 1.25rem;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .cat-card:hover { border-color: #c5c0b8; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .cat-card.selected { border-color: var(--c-accent); background: var(--c-accent-light); }
+
+    .item-row {
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: 0.875rem;
+      padding: 0.875rem 1rem;
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      transition: background 0.1s;
+    }
+    .item-row:hover { background: #faf9f7; }
+
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.7rem; font-weight: 600;
+      border: 1px solid;
+    }
+    .badge-red { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+    .badge-amber { background: var(--c-amber-light); color: var(--c-amber); border-color: #fcd34d; }
+    .badge-gray { background: #f9fafb; color: #6b7280; border-color: #e5e7eb; }
+    .badge-green { background: var(--c-green-light); color: var(--c-green); border-color: #86efac; }
+
+    .btn-primary {
+      background: var(--c-text); color: white;
+      border: none; border-radius: 0.75rem;
+      padding: 0.625rem 1.125rem;
+      font-size: 0.875rem; font-weight: 500;
+      cursor: pointer; transition: background 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-primary:hover { background: #333; }
+    .btn-danger {
+      background: #fee2e2; color: #991b1b;
+      border: 1px solid #fecaca;
+      border-radius: 0.75rem;
+      padding: 0.5rem 0.875rem;
+      font-size: 0.8rem; font-weight: 500;
+      cursor: pointer; transition: background 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-danger:hover { background: #fecaca; }
+    .btn-ghost {
+      background: transparent; color: var(--c-muted);
+      border: 1px solid var(--c-border);
+      border-radius: 0.75rem;
+      padding: 0.5rem 0.875rem;
+      font-size: 0.8rem;
+      cursor: pointer; transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-ghost:hover { background: var(--c-bg); color: var(--c-text); }
+
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none; align-items: center; justify-content: center;
+      padding: 1rem; z-index: 100;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      width: 100%; max-width: 560px;
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], input[type="url"], select, textarea {
+      width: 100%;
+      background: white;
+      border: 1.5px solid var(--c-border);
+      border-radius: 0.75rem;
+      padding: 0.625rem 0.875rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--c-text);
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--c-accent); }
+
+    .limit-banner {
+      background: linear-gradient(135deg, #1a1714 0%, #2d2926 100%);
+      color: white;
+      border-radius: 1rem;
+      padding: 1rem 1.25rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+
+    .user-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--c-accent);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700; font-size: 0.875rem;
+      overflow: hidden;
+    }
+    .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .sync-indicator {
+      display: inline-flex; align-items: center; gap: 0.375rem;
+      font-size: 0.75rem; color: var(--c-muted);
+    }
+    .sync-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #d1d5db;
+    }
+    .sync-dot.synced { background: var(--c-green); }
+    .sync-dot.syncing { background: #f59e0b; animation: pulse 1s infinite; }
+
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .water-card {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border: 1.5px solid #bfdbfe;
+      border-radius: 1rem;
+      padding: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+      .modal-box { border-radius: 1rem; }
+    }
+  </style>
 </head>
+<body>
 
-<body class="bg-slate-50 text-slate-900 min-h-screen">
-  <div class="max-w-6xl mx-auto px-4 py-6">
-    <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <h1 class="text-2xl md:text-3xl font-bold">Prepper / Survival</h1>
-        <p class="text-slate-600">Prehľad pripravenosti domácnosti + expirácie + núdzové plány</p>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <button id="btnExport" class="px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-sm">Export JSON</button>
-        <label class="px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-sm cursor-pointer">
-          Import JSON
-          <input id="fileImport" type="file" accept="application/json" class="hidden" />
-        </label>
-        <button id="btnReset" class="px-3 py-2 rounded-xl bg-rose-600 text-white hover:bg-rose-500 text-sm">Reset</button>
-      </div>
-    </header>
-
-    <main class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <!-- Left: Profile / Alerts -->
-      <section class="lg:col-span-1 space-y-4">
-        <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold">Profil domácnosti</h2>
-            <button id="btnEditProfile" class="text-sm text-sky-700 hover:text-sky-800">Upraviť</button>
-          </div>
-          <div id="profileCard" class="mt-3 text-sm text-slate-800 space-y-1"></div>
-        </div>
-
-        <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
-          <div class="flex items-center justify-between gap-3">
-            <h2 class="text-lg font-semibold">Upozornenia (expirácie)</h2>
-            <button id="btnAskNotif" class="text-sm text-sky-700 hover:text-sky-800">Zapnúť notifikácie</button>
-          </div>
-
-          <div class="mt-3 flex items-center gap-2">
-            <label class="text-sm text-slate-700">Upozorniť</label>
-            <select id="alertDays" class="bg-white border border-slate-200 rounded-xl px-2 py-1 text-sm">
-              <option value="7">7 dní vopred</option>
-              <option value="14">14 dní vopred</option>
-              <option value="30" selected>30 dní vopred</option>
-              <option value="60">60 dní vopred</option>
-            </select>
-          </div>
-
-          <div id="alertsBox" class="mt-3 space-y-2"></div>
-          <p class="mt-3 text-xs text-slate-500">
-            Pozn.: Browser notifikácie fungujú len keď je stránka otvorená. Pre “push” mimo stránky treba PWA.
-          </p>
-        </div>
-
-        <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
-          <h2 class="text-lg font-semibold">Núdzové plány A / B / C</h2>
-          <p class="text-sm text-slate-600 mt-1">Priprav si texty a kontakty. Odoslanie cez SMS appku v mobile.</p>
-          <div class="mt-3 space-y-3" id="plansBox"></div>
-        </div>
-      </section>
-
-      <!-- Right: Dashboard -->
-      <section class="lg:col-span-2 space-y-4">
-        <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div>
-              <h2 class="text-lg font-semibold">Prehľad pripravenosti</h2>
-              <p class="text-sm text-slate-600">Celkové skóre je vážený priemer kategórií.</p>
-            </div>
-            <div class="min-w-[240px]">
-              <div class="flex items-center justify-between text-sm text-slate-700">
-                <span>Celkom</span>
-                <span id="overallPct" class="font-semibold text-slate-900">0%</span>
-              </div>
-              <div class="mt-2 h-3 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
-                <div id="overallBar" class="h-3 w-0"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div id="categoriesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-
-        <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold">Detail kategórie</h2>
-            <div class="flex gap-2">
-              <button id="btnAddItem" class="px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-sm">Pridať položku</button>
-            </div>
-          </div>
-
-          <div id="categoryDetail" class="mt-4"></div>
-        </div>
-      </section>
-    </main>
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="logo-mark">🛡️</div>
+    <h1 style="font-size:1.75rem; font-weight:800; margin-bottom:0.5rem;">Bez Paniky</h1>
+    <p style="color:var(--c-muted); font-size:0.9rem; margin-bottom:2rem; line-height:1.6;">
+      Civilná pripravenosť domácnosti.<br>Zásoby, expirácie, núdzové plány.
+    </p>
+    <button class="btn-google" id="btnGoogleLogin">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Prihlásiť sa cez Google
+    </button>
+    <div id="loginError" style="margin-top:1rem; color:#991b1b; font-size:0.85rem; display:none;"></div>
+    <p style="margin-top:1.5rem; font-size:0.75rem; color:var(--c-muted); line-height:1.6;">
+      Prihlásením súhlasíš s ukladaním tvojich dát v zabezpečenej databáze.<br>
+      Každý používateľ vidí len svoje vlastné dáta.
+    </p>
   </div>
+  <p style="margin-top:1.5rem; font-size:0.75rem; color:var(--c-muted);">
+    Bez Paniky © 2025 – Zadarmo pre verejnosť
+  </p>
+</div>
 
-  <!-- Modal: Profile -->
-  <div id="modalProfile" class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white border border-slate-200 p-4 shadow-lg">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold">Úvodné nastavenie</h3>
-        <button data-close="modalProfile" class="text-slate-500 hover:text-slate-900">✕</button>
-      </div>
+<!-- REGISTRATION CLOSED SCREEN -->
+<div id="closedScreen" style="display:none;" class="login-screen">
+  <div class="login-card">
+    <div class="logo-mark">🔒</div>
+    <h1 style="font-size:1.5rem; font-weight:800; margin-bottom:0.5rem;">Registrácia uzavretá</h1>
+    <p style="color:var(--c-muted); font-size:0.9rem; line-height:1.6;">
+      Momentálne sme dosiahli maximálny počet používateľov v beta verzii. Skús to znova neskôr.
+    </p>
+  </div>
+</div>
 
-      <form id="profileForm" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
-          <label class="text-sm text-slate-700">Dospelí (13-64 rokov)</label>
-          <input name="adults" type="number" min="0" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" required />
-        </div>
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
-          <label class="text-sm text-slate-700">Deti (1-12 rokov)</label>
-          <input name="kids" type="number" min="0" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" required />
-        </div>
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
-          <label class="text-sm text-slate-700">Dojčatá (0-1 rok)</label>
-          <input name="infants" type="number" min="0" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" required />
-        </div>
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
-          <label class="text-sm text-slate-700">Seniori (65+ rokov)</label>
-          <input name="seniors" type="number" min="0" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" required />
-        </div>
-
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 md:col-span-2">
-          <label class="text-sm text-slate-700">Doba pripravenosti (dni)</label>
-          <input name="prepDays" type="number" min="1" max="30" value="3" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" required />
-          <p class="text-xs text-slate-500 mt-1">Odporúčané minimum: 3 dni. Pre lepšiu prípravu: 7-14 dní.</p>
-        </div>
-
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
-          <label class="text-sm text-slate-700">Pripravenosť</label>
-          <select name="readiness" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2">
-            <option value="minimal">Minimálna</option>
-            <option value="medium" selected>Stredná</option>
-            <option value="high">Vysoká</option>
-          </select>
-        </div>
-
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
-          <label class="text-sm text-slate-700">Typ bývania</label>
-          <select name="housing" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2">
-            <option value="rd">Rodinný dom</option>
-            <option value="rd_cellar">Rodinný dom + pivnica</option>
-            <option value="flat">Byt</option>
-          </select>
-        </div>
-
-        <div class="md:col-span-2 flex items-center justify-between gap-3 mt-2">
-          <p class="text-xs text-slate-500">
-            Tip: MVP ukladá dáta lokálne. Produkcia: účet + cloud sync.
-          </p>
-          <button class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">
-            Uložiť
-          </button>
-        </div>
-      </form>
+<!-- MAIN APP -->
+<div id="appScreen" style="display:none;">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="app-header-logo">
+      <div class="app-logo-sm">🛡️</div>
+      <span style="font-family:'Syne',sans-serif; font-weight:700; font-size:1.0625rem;">Bez Paniky</span>
     </div>
-  </div>
-
-  <!-- Modal: Add Item -->
-  <div id="modalAddItem" class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white border border-slate-200 p-4 shadow-lg">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold">Pridať položku</h3>
-        <button data-close="modalAddItem" class="text-slate-500 hover:text-slate-900">✕</button>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span class="sync-indicator">
+        <span class="sync-dot" id="syncDot"></span>
+        <span id="syncLabel">–</span>
+      </span>
+      <div style="display:flex; align-items:center; gap:0.5rem;">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <button class="btn-ghost" id="btnLogout" style="padding:0.375rem 0.75rem;">Odhlásiť</button>
       </div>
-
-      <form id="addItemForm" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 md:col-span-2">
-          <label class="text-sm text-slate-700">Názov</label>
-          <input name="name" type="text" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" required />
-        </div>
-
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
-          <label class="text-sm text-slate-700">Množstvo (voliteľné)</label>
-          <input name="qty" type="text" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" />
-        </div>
-
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
-          <label class="text-sm text-slate-700">Expirácia (voliteľné)</label>
-          <input name="expiry" type="date" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" />
-        </div>
-
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 md:col-span-2">
-          <label class="text-sm text-slate-700">Odporúčaný odkaz (URL – voliteľné)</label>
-          <input name="link" type="url" placeholder="https://..." class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" />
-          <p class="mt-2 text-xs text-slate-500">
-            Pri položke sa zobrazí ikonka 🔗, ktorá otvorí obchod v novej karte.
-          </p>
-        </div>
-
-        <div class="md:col-span-2 flex items-center justify-between gap-3 mt-2">
-          <p class="text-xs text-slate-500">
-            Položky bez expirácie sa nezobrazia v upozorneniach.
-          </p>
-          <button class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold">
-            Pridať
-          </button>
-        </div>
-      </form>
     </div>
-  </div>
+  </header>
 
-  <script>
-    // -------------------------
-    // Storage + defaults
-    // -------------------------
-    const LS_KEY = "prepper_mvp_v2_light";
+  <div style="max-width:1100px; margin:0 auto; padding:1.5rem 1rem;">
+    <div style="display:grid; grid-template-columns:1fr; gap:1rem;">
 
-    const CATEGORIES = [
-      { id: "food_water", name: "Jedlo a voda", weight: 1.2 },
-      { id: "cash", name: "Peniaze (hotovosť)", weight: 0.8 },
-      { id: "medkit", name: "Lekárnička", weight: 1.1 },
-      { id: "hygiene", name: "Hygiena", weight: 0.8 },
-      { id: "gear", name: "Predmety", weight: 1.0 },
-      { id: "docs", name: "Doklady a kontakty", weight: 0.9 },
-      { id: "plans", name: "Núdzový plán A/B/C", weight: 1.2 },
-    ];
+      <!-- Top row: Profile + Overall Score -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
 
-    // Default items now include optional `link`
-    const DEFAULT_ITEMS = {
-      food_water: [
-        { name: "Pitná voda (min. 3 dni)", done: false, qty: "", expiry: "", link: "", waterBottles: 0, isWaterItem: true },
-        { name: "Trvanlivé jedlo (min. 3 dni)", done: false, qty: "", expiry: "", link: "" },
-        { name: "Otvarač / varič / palivo", done: false, qty: "", expiry: "", link: "" },
-      ],
-      cash: [
-        { name: "Hotovosť na 3–7 dní", done: false, qty: "", expiry: "", link: "" },
-        { name: "Drobné mince", done: false, qty: "", expiry: "", link: "" },
-      ],
-      medkit: [
-        { name: "Základné lieky proti bolesti", done: false, qty: "", expiry: "", link: "" },
-        { name: "Obväzy, dezinfekcia, rukavice", done: false, qty: "", expiry: "", link: "" },
-        { name: "Lieky na predpis (rezerva)", done: false, qty: "", expiry: "", link: "" },
-      ],
-      hygiene: [
-        { name: "Toaletný papier / vlhčené utierky", done: false, qty: "", expiry: "", link: "" },
-        { name: "Mydlo / dezinfekcia", done: false, qty: "", expiry: "", link: "" },
-      ],
-      gear: [
-        { name: "Baterka + batérie", done: false, qty: "", expiry: "", link: "" },
-        { name: "Powerbanka", done: false, qty: "", expiry: "", link: "" },
-        {
-          name: "Plynový varič Jetboil MiniMo",
-          done: false,
-          qty: "1 ks",
-          expiry: "",
-          link: "https://www.4camping.sk/p/varic-jetboil-minimo/?ppcbee-adtext-variant=RSA&utm_source=google&utm_medium=cpc&utm_campaign=3-(SK)-SEA-PRO%20new&utm_id=20619195074&gad_source=1&gad_campaignid=20619195074&gbraid=0AAAAADb_NTWwcmzAbJRfPNibpvQIGyglG&gclid=CjwKCAiAncvMBhBEEiwA9GU_fmm9ori8pscp3F64134By6lCwmoPqem5YbNp7GgiP05gMgSpqGrVFRoCesgQAvD_BwE"
-        },
-      ],
-      docs: [
-        { name: "Kópie dokladov (papier/USB)", done: false, qty: "", expiry: "", link: "" },
-        { name: "Zoznam kontaktov (offline)", done: false, qty: "", expiry: "", link: "" },
-      ],
-      plans: [
-        { name: "Miesto stretnutia (A)", done: false, qty: "", expiry: "", link: "" },
-        { name: "Záložné miesto (B)", done: false, qty: "", expiry: "", link: "" },
-        { name: "Evakuačná trasa (C)", done: false, qty: "", expiry: "", link: "" },
-      ],
-    };
-
-    const DEFAULT_STATE = {
-      profile: null,
-      selectedCategoryId: CATEGORIES[0].id,
-      alertDays: 30,
-      waterInventory: {
-        bottles15: 0,
-        bottles05: 0,
-        otherWater: 0
-      },
-      plans: {
-        A: { message: "Sme v poriadku. Ideme na miesto A: _____.", phones: "" },
-        B: { message: "Presúvame sa na miesto B: _____.", phones: "" },
-        C: { message: "Evakuácia. Ideme na miesto C: _____.", phones: "" },
-      },
-      items: structuredClone(DEFAULT_ITEMS),
-      notified: {}
-    };
-
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(LS_KEY);
-        if (!raw) return structuredClone(DEFAULT_STATE);
-        const parsed = JSON.parse(raw);
-
-        // Ensure new `link` exists on items (migration safe)
-        const mergedItems = { ...structuredClone(DEFAULT_STATE.items), ...(parsed.items || {}) };
-        for (const cid of Object.keys(mergedItems)) {
-          mergedItems[cid] = (mergedItems[cid] || []).map(it => ({
-            link: "",
-            waterBottles: 0,
-            isWaterItem: false,
-            ...it
-          }));
-        }
-
-        return {
-          ...structuredClone(DEFAULT_STATE),
-          ...parsed,
-          waterInventory: { ...structuredClone(DEFAULT_STATE.waterInventory), ...(parsed.waterInventory || {}) },
-          items: mergedItems,
-          plans: { ...structuredClone(DEFAULT_STATE.plans), ...(parsed.plans || {}) }
-        };
-      } catch {
-        return structuredClone(DEFAULT_STATE);
-      }
-    }
-
-    let state = loadState();
-
-    function saveState() {
-      localStorage.setItem(LS_KEY, JSON.stringify(state));
-    }
-
-    // -------------------------
-    // Helpers
-    // -------------------------
-    const $ = (id) => document.getElementById(id);
-    const fmt = (n) => Math.round(n) + "%";
-
-    function clamp01(x) { return Math.max(0, Math.min(1, x)); }
-
-    // Map 0..100 -> red(0) to green(120) in HSL
-    function colorForPct(pct) {
-      const t = clamp01((pct || 0) / 100);
-      const hue = 0 + (120 * t);
-      return `hsl(${hue} 80% 40%)`;
-    }
-
-    function bgTintForPct(pct) {
-      const t = clamp01((pct || 0) / 100);
-      const hue = 0 + (120 * t);
-      return `hsl(${hue} 80% 95%)`;
-    }
-
-    function emojiForPct(pct) {
-      const p = Math.round(pct || 0);
-      if (p < 25) return "😟";      // otrhanec vibe
-      if (p < 50) return "😐";      // neutral
-      if (p < 75) return "🙂";      // ok
-      if (p < 100) return "😄";     // strong
-      return "🛡️";                 // “rytier / shield” at 100%
-    }
-
-    function rankForPct(pct) {
-      const p = Math.round(pct || 0);
-      if (p < 25) return "Otrhanec";
-      if (p < 50) return "Učeň";
-      if (p < 75) return "Strážca";
-      if (p < 100) return "Bojovník";
-      return "Rytier";
-    }
-
-    function openModal(id) {
-      const el = $(id);
-      el.classList.remove("hidden");
-      el.classList.add("flex");
-    }
-
-    function closeModal(id) {
-      const el = $(id);
-      el.classList.add("hidden");
-      el.classList.remove("flex");
-    }
-
-    function parsePhones(str) {
-      return (str || "").split(",").map(s => s.trim()).filter(Boolean);
-    }
-
-    function daysUntil(dateStr) {
-      const d = new Date(dateStr + "T00:00:00");
-      const now = new Date();
-      const ms = d - now;
-      return Math.ceil(ms / (1000 * 60 * 60 * 24));
-    }
-
-    function itemId(catId, idx) { return catId + ":" + idx; }
-
-    function isValidHttpUrl(u) {
-      try {
-        const url = new URL(u);
-        return url.protocol === "http:" || url.protocol === "https:";
-      } catch { return false; }
-    }
-
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    // Vypočíta koľko % je splnená položka vody
-    function calculateWaterItemCompletion(item) {
-      if (!item.isWaterItem || !state.profile) return item.done ? 100 : 0;
-      
-      const p = state.profile;
-      const days = p.prepDays || 3;
-      const waterAdults = (p.adults || 0) * 2.0 * days;
-      const waterKids = (p.kids || 0) * 1.5 * days;
-      const waterInfants = (p.infants || 0) * 1.0 * days;
-      const waterSeniors = (p.seniors || 0) * 2.0 * days;
-      const totalWaterNeeded = waterAdults + waterKids + waterInfants + waterSeniors;
-      
-      const currentWater = (item.waterBottles || 0) * 1.5;
-      
-      if (totalWaterNeeded === 0) return 0;
-      return Math.min(100, (currentWater / totalWaterNeeded) * 100);
-    }
-
-    // -------------------------
-    // Scoring
-    // -------------------------
-    function categoryScore(catId) {
-      const items = state.items[catId] || [];
-      if (!items.length) return 0;
-      
-      let totalScore = 0;
-      items.forEach(item => {
-        if (item.isWaterItem) {
-          // Pre položku vody počítaj percentuálne splnenie
-          totalScore += calculateWaterItemCompletion(item);
-        } else {
-          // Pre ostatné položky: hotové = 100%, nehotové = 0%
-          totalScore += item.done ? 100 : 0;
-        }
-      });
-      
-      return totalScore / items.length;
-    }
-
-    function overallScore() {
-      let wSum = 0, sum = 0;
-      for (const c of CATEGORIES) {
-        const s = categoryScore(c.id);
-        sum += s * c.weight;
-        wSum += c.weight;
-      }
-      return wSum ? (sum / wSum) : 0;
-    }
-
-    // -------------------------
-    // Render
-    // -------------------------
-    function renderProfileCard() {
-      const box = $("profileCard");
-      if (!state.profile) {
-        box.innerHTML = `<p class="text-slate-600">Profil ešte nie je nastavený.</p>
-          <button class="mt-3 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold" id="btnStart">
-            Spustiť nastavenie
-          </button>`;
-        setTimeout(() => {
-          const b = $("btnStart");
-          if (b) b.onclick = () => openModal("modalProfile");
-        }, 0);
-        return;
-      }
-
-      const p = state.profile;
-      const readinessLabel = p.readiness === "minimal" ? "Minimálna" : p.readiness === "high" ? "Vysoká" : "Stredná";
-      const housingLabel = p.housing === "rd_cellar" ? "RD + pivnica" : p.housing === "flat" ? "Byt" : "Rodinný dom";
-      const days = p.prepDays || 3;
-      
-      // Výpočet vody podľa WHO štandardov a českej príručky "72 HODIN"
-      const waterAdults = (p.adults || 0) * 2.0 * days;
-      const waterKids = (p.kids || 0) * 1.5 * days;
-      const waterInfants = (p.infants || 0) * 1.0 * days;
-      const waterSeniors = (p.seniors || 0) * 2.0 * days;
-      const totalWater = waterAdults + waterKids + waterInfants + waterSeniors;
-
-      box.innerHTML = `
-        <div class="grid grid-cols-2 gap-2">
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-2">
-            <div class="text-xs text-slate-500">Dospelí</div>
-            <div class="font-semibold">${p.adults || 0}</div>
+        <!-- Profile Card -->
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.875rem;">
+            <h2 style="font-size:1rem; font-weight:700;">Profil domácnosti</h2>
+            <button class="btn-ghost" id="btnEditProfile" style="font-size:0.8rem;">Upraviť</button>
           </div>
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-2">
-            <div class="text-xs text-slate-500">Deti</div>
-            <div class="font-semibold">${p.kids || 0}</div>
-          </div>
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-2">
-            <div class="text-xs text-slate-500">Dojčatá</div>
-            <div class="font-semibold">${p.infants || 0}</div>
-          </div>
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-2">
-            <div class="text-xs text-slate-500">Seniori</div>
-            <div class="font-semibold">${p.seniors || 0}</div>
-          </div>
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-2">
-            <div class="text-xs text-slate-500">Príprava na</div>
-            <div class="font-semibold">${days} dní</div>
-          </div>
-          <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-2">
-            <div class="text-xs text-emerald-700">💧 Potreba vody</div>
-            <div class="font-semibold text-emerald-900">${totalWater.toFixed(1)} L</div>
-          </div>
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-2">
-            <div class="text-xs text-slate-500">Bývanie</div>
-            <div class="font-semibold">${housingLabel}</div>
-          </div>
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-2">
-            <div class="text-xs text-slate-500">Pripravenosť</div>
-            <div class="font-semibold">${readinessLabel}</div>
-          </div>
+          <div id="profileCard"></div>
         </div>
-      `;
-    }
 
-    function setBar(el, pct) {
-      const w = Math.max(0, Math.min(100, pct));
-      el.style.width = w + "%";
-      el.style.background = colorForPct(pct);
-    }
-
-    function renderOverall() {
-      const pct = overallScore();
-      $("overallPct").textContent = fmt(pct);
-      setBar($("overallBar"), pct);
-    }
-
-    function renderCategories() {
-      const grid = $("categoriesGrid");
-      grid.innerHTML = "";
-
-      for (const c of CATEGORIES) {
-        const pct = categoryScore(c.id);
-        const isSel = state.selectedCategoryId === c.id;
-
-        const card = document.createElement("button");
-        card.className = `text-left rounded-2xl border p-4 transition shadow-sm
-          ${isSel ? "bg-white border-sky-300" : "bg-white border-slate-200 hover:border-slate-300"}`;
-
-        const col = colorForPct(pct);
-        const tint = bgTintForPct(pct);
-
-        card.innerHTML = `
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <div class="text-base font-semibold">${c.name}</div>
-              <div class="text-sm text-slate-600 mt-1">${fmt(pct)} pripravenosť • <span class="font-semibold">${rankForPct(pct)}</span></div>
-            </div>
-
-            <div class="h-11 w-11 rounded-full border flex items-center justify-center font-bold"
-                 style="border-color:${col}; background:${tint}; color:${col};">
-              <span class="text-xl leading-none" title="${rankForPct(pct)}">${emojiForPct(pct)}</span>
-            </div>
-          </div>
-
-          <div class="mt-3 h-2 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
-            <div class="h-2" style="width:${Math.max(0, Math.min(100, pct))}%; background:${col};"></div>
-          </div>
-        `;
-
-        card.onclick = () => {
-          state.selectedCategoryId = c.id;
-          saveState();
-          renderAll();
-        };
-
-        grid.appendChild(card);
-      }
-    }
-
-    function renderCategoryDetail() {
-      const catId = state.selectedCategoryId;
-      const cat = CATEGORIES.find(c => c.id === catId);
-      const items = state.items[catId] || [];
-
-      const pct = categoryScore(catId);
-      const wrap = document.createElement("div");
-
-      wrap.innerHTML = `
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <!-- Overall Score -->
+        <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
           <div>
-            <div class="text-xl font-bold">${cat.name}</div>
-            <div class="text-sm text-slate-600">${items.filter(i=>i.done).length} / ${items.length} hotovo</div>
+            <h2 style="font-size:1rem; font-weight:700; margin-bottom:0.25rem;">Celková pripravenosť</h2>
+            <p style="font-size:0.8rem; color:var(--c-muted);">Vážený priemer všetkých kategórií</p>
           </div>
-          <div class="min-w-[260px]">
-            <div class="flex items-center justify-between text-sm text-slate-700">
-              <span>Kategória</span>
-              <span class="font-semibold">${fmt(pct)} • ${rankForPct(pct)}</span>
+          <div style="margin-top:1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.5rem;">
+              <span id="overallRank" style="font-family:'Syne',sans-serif; font-weight:700; font-size:1.25rem;">–</span>
+              <span id="overallPct" style="font-size:2rem; font-weight:800; font-family:'Syne',sans-serif;">0%</span>
             </div>
-            <div class="mt-2 h-3 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
-              <div id="catBar" class="h-3"></div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="overallBar" style="width:0%"></div>
             </div>
           </div>
         </div>
-      `;
+      </div>
 
-      const list = document.createElement("div");
-      list.className = "mt-4 space-y-2";
+      <!-- Alerts -->
+      <div class="card" id="alertsSection" style="display:none;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+          <h2 style="font-size:1rem; font-weight:700;">⚠️ Upozornenia</h2>
+          <select id="alertDays" style="width:auto; font-size:0.8rem; padding:0.3rem 0.6rem;">
+            <option value="7">7 dní</option>
+            <option value="14">14 dní</option>
+            <option value="30" selected>30 dní</option>
+            <option value="60">60 dní</option>
+          </select>
+        </div>
+        <div id="alertsBox"></div>
+      </div>
 
-      if (!items.length) {
-        list.innerHTML = `<p class="text-slate-600 text-sm">Zatiaľ bez položiek.</p>`;
-      } else {
-        items.forEach((it, idx) => {
-          const id = itemId(catId, idx);
-          
-          // ŠPECIÁLNE VYKRESLENIE PRE POLOŽKU VODY
-          if (it.isWaterItem && state.profile) {
-            const p = state.profile;
-            const days = p.prepDays || 3;
-            const waterAdults = (p.adults || 0) * 2.0 * days;
-            const waterKids = (p.kids || 0) * 1.5 * days;
-            const waterInfants = (p.infants || 0) * 1.0 * days;
-            const waterSeniors = (p.seniors || 0) * 2.0 * days;
-            const totalWaterNeeded = waterAdults + waterKids + waterInfants + waterSeniors;
-            const currentWater = (it.waterBottles || 0) * 1.5;
-            const waterPct = calculateWaterItemCompletion(it);
-            
-            let progressColor = "bg-rose-500";
-            if (waterPct >= 100) progressColor = "bg-emerald-500";
-            else if (waterPct >= 50) progressColor = "bg-amber-500";
+      <!-- Categories Grid -->
+      <div>
+        <h2 style="font-family:'Syne',sans-serif; font-weight:700; font-size:1.0625rem; margin-bottom:0.75rem;">Kategórie</h2>
+        <div id="categoriesGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:0.75rem;"></div>
+      </div>
 
-            const row = document.createElement("div");
-            row.className = "rounded-xl bg-gradient-to-br from-sky-50 to-blue-50 border-2 border-sky-200 p-4 shadow-sm";
-            row.innerHTML = `
-              <div class="flex items-start justify-between gap-3 mb-3">
-                <div class="flex items-start gap-3 flex-1">
-                  <div class="mt-1">💧</div>
-                  <div class="flex-1">
-                    <div class="font-bold text-lg text-sky-900">
-                      ${escapeHtml(it.name)}
-                    </div>
-                    <div class="text-sm text-sky-700 mt-1">
-                      ${currentWater.toFixed(1)} L / ${totalWaterNeeded.toFixed(1)} L potrebných
-                    </div>
-                  </div>
-                </div>
-                <button class="text-sky-700 hover:text-sky-900 text-sm px-3 py-1 rounded-lg bg-white border border-sky-300 hover:bg-sky-50" 
-                        id="btnWaterInfo_${idx}" 
-                        title="Informácie o výpočte">
-                  ℹ️ Info
-                </button>
-              </div>
+      <!-- Category Detail -->
+      <div class="card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+          <h2 style="font-size:1rem; font-weight:700;">Detail kategórie</h2>
+          <button class="btn-primary" id="btnAddItem">+ Pridať položku</button>
+        </div>
+        <div id="categoryDetail"></div>
+      </div>
 
-              <div class="mb-3">
-                <div class="flex items-center justify-between text-sm mb-2">
-                  <span class="text-sky-800 font-medium">Pripravenosť</span>
-                  <span class="text-lg font-bold ${waterPct >= 100 ? 'text-emerald-600' : waterPct >= 50 ? 'text-amber-600' : 'text-rose-600'}">
-                    ${Math.round(waterPct)}%
-                  </span>
-                </div>
-                <div class="h-3 rounded-full bg-white border border-sky-200 overflow-hidden">
-                  <div class="${progressColor} h-3 transition-all duration-500" style="width: ${Math.min(waterPct, 100)}%"></div>
-                </div>
-                <p class="text-xs text-sky-600 mt-1">
-                  ${waterPct < 50 ? '⚠️ Nedostatočná zásoba' : waterPct < 100 ? '⏳ Čiastočne pripravené' : '✅ Plne pripravené'}
-                </p>
-              </div>
+      <!-- Plans -->
+      <div class="card">
+        <h2 style="font-size:1rem; font-weight:700; margin-bottom:0.875rem;">📋 Núdzové plány A / B / C</h2>
+        <div id="plansBox" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:0.75rem;"></div>
+      </div>
 
-              <div class="rounded-xl bg-white border border-sky-200 p-3">
-                <label class="text-sm text-sky-800 font-medium block mb-2">
-                  Evidencia fliaš 1.5 L
-                </label>
-                <div class="flex items-center gap-3">
-                  <input type="number" 
-                         min="0" 
-                         value="${it.waterBottles || 0}" 
-                         class="flex-1 px-3 py-2 rounded-xl border-2 border-sky-200 focus:border-sky-400 focus:outline-none text-lg font-semibold" 
-                         id="waterBottles_${idx}"
-                         placeholder="0" />
-                  <span class="text-sm text-slate-600 whitespace-nowrap">ks = ${currentWater.toFixed(1)} L</span>
-                </div>
-              </div>
+    </div>
+  </div>
+</div>
 
-              <div class="mt-3 rounded-xl bg-sky-100 border border-sky-300 p-3 text-xs text-sky-800">
-                <strong>💡 Tip:</strong> Odporúča sa mať minimálne 2/3 celkovej potreby v balených fľašiach 1.5L.
-              </div>
-            `;
-            list.appendChild(row);
+<!-- Modal: Profile -->
+<div class="modal-overlay" id="modalProfile">
+  <div class="modal-box">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
+      <h3 style="font-family:'Syne',sans-serif; font-weight:700; font-size:1.125rem;">Nastavenie domácnosti</h3>
+      <button data-close="modalProfile" style="background:none;border:none;cursor:pointer;color:var(--c-muted);font-size:1.25rem;">✕</button>
+    </div>
+    <form id="profileForm" style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+      <div>
+        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Dospelí (13–64)</label>
+        <input name="adults" type="number" min="0" required />
+      </div>
+      <div>
+        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Deti (1–12)</label>
+        <input name="kids" type="number" min="0" required />
+      </div>
+      <div>
+        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Dojčatá (0–1)</label>
+        <input name="infants" type="number" min="0" required />
+      </div>
+      <div>
+        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Seniori (65+)</label>
+        <input name="seniors" type="number" min="0" required />
+      </div>
+      <div style="grid-column:1/-1;">
+        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Počet dní pripravenosti</label>
+        <input name="prepDays" type="number" min="1" max="30" value="3" required />
+        <p style="font-size:0.75rem; color:var(--c-muted); margin-top:0.25rem;">Min. 3 dni. Odporúčané: 7–14 dní.</p>
+      </div>
+      <div>
+        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Typ bývania</label>
+        <select name="housing">
+          <option value="flat">Byt</option>
+          <option value="rd">Rodinný dom</option>
+          <option value="rd_cellar">RD + pivnica</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Úroveň pripravenosti</label>
+        <select name="readiness">
+          <option value="minimal">Minimálna</option>
+          <option value="medium" selected>Stredná</option>
+          <option value="high">Vysoká</option>
+        </select>
+      </div>
+      <div style="grid-column:1/-1; display:flex; justify-content:flex-end; padding-top:0.5rem;">
+        <button type="submit" class="btn-primary" style="padding:0.75rem 2rem;">Uložiť</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-            // Bind events after render
-            setTimeout(() => {
-              const input = document.getElementById(`waterBottles_${idx}`);
-              const infoBtn = document.getElementById(`btnWaterInfo_${idx}`);
-              
-              if (input) {
-                input.onchange = () => {
-                  state.items[catId][idx].waterBottles = Number(input.value) || 0;
-                  saveState();
-                  renderAll();
-                };
-              }
+<!-- Modal: Add Item -->
+<div class="modal-overlay" id="modalAddItem">
+  <div class="modal-box">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
+      <h3 style="font-family:'Syne',sans-serif; font-weight:700; font-size:1.125rem;">Pridať položku</h3>
+      <button data-close="modalAddItem" style="background:none;border:none;cursor:pointer;color:var(--c-muted);font-size:1.25rem;">✕</button>
+    </div>
+    <form id="addItemForm" style="display:grid; gap:0.75rem;">
+      <div>
+        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Názov *</label>
+        <input name="name" type="text" required />
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+        <div>
+          <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Množstvo</label>
+          <input name="qty" type="text" placeholder="napr. 5 ks" />
+        </div>
+        <div>
+          <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Expirácia</label>
+          <input name="expiry" type="date" />
+        </div>
+      </div>
+      <div>
+        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Odkaz (URL)</label>
+        <input name="link" type="url" placeholder="https://..." />
+      </div>
+      <div style="display:flex; justify-content:flex-end; padding-top:0.5rem;">
+        <button type="submit" class="btn-primary" style="padding:0.75rem 2rem;">Pridať</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-              if (infoBtn) {
-                infoBtn.onclick = () => {
-                  alert(`Výpočet potreby vody (podľa WHO a českej príručky "72 HODIN"):
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, runTransaction }
+    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-Dospelí (13-64 rokov): 2 L/deň
-Deti (1-12 rokov): 1.5 L/deň  
-Dojčatá (0-1 rok): 1 L/deň
-Seniori (65+ rokov): 2 L/deň
+  // ── Firebase config ──────────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyA5_U4_9La4JpK8wAXBqY6GmkKxCLkH8T4",
+    authDomain: "bez-paniky.firebaseapp.com",
+    projectId: "bez-paniky",
+    storageBucket: "bez-paniky.firebasestorage.app",
+    messagingSenderId: "539726693021",
+    appId: "1:539726693021:web:123de9d93568a285e54a74"
+  };
 
-Vzorec: počet osôb × potreba/deň × ${days} dní
+  const MAX_USERS = 500; // Limit registrácií
 
-Vaša domácnosť:
-• Dospelí: ${p.adults || 0} × 2 L × ${days} dní = ${waterAdults.toFixed(1)} L
-• Deti: ${p.kids || 0} × 1.5 L × ${days} dní = ${waterKids.toFixed(1)} L
-• Dojčatá: ${p.infants || 0} × 1 L × ${days} dní = ${waterInfants.toFixed(1)} L
-• Seniori: ${p.seniors || 0} × 2 L × ${days} dní = ${waterSeniors.toFixed(1)} L
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-Celkom potrebujete: ${totalWaterNeeded.toFixed(1)} L
+  // ── App state ────────────────────────────────────────────────────
+  const CATEGORIES = [
+    { id: "food_water", name: "Jedlo a voda", emoji: "🥫", weight: 1.2 },
+    { id: "cash", name: "Peniaze", emoji: "💵", weight: 0.8 },
+    { id: "medkit", name: "Lekárnička", emoji: "🩺", weight: 1.1 },
+    { id: "hygiene", name: "Hygiena", emoji: "🧼", weight: 0.8 },
+    { id: "gear", name: "Vybavenie", emoji: "🔦", weight: 1.0 },
+    { id: "docs", name: "Doklady", emoji: "📄", weight: 0.9 },
+    { id: "plans", name: "Núdzový plán", emoji: "📋", weight: 1.2 },
+  ];
 
-Aktuálne máte: ${currentWater.toFixed(1)} L (${it.waterBottles || 0} fliaš × 1.5 L)
-Chýba vám ešte: ${Math.max(0, totalWaterNeeded - currentWater).toFixed(1)} L`);
-                };
-              }
-            }, 0);
-            
-            return; // Skip normal rendering
-          }
+  const DEFAULT_ITEMS = {
+    food_water: [
+      { name: "Pitná voda (min. 3 dni)", done: false, qty: "", expiry: "", link: "", isWaterItem: true, waterBottles: 0 },
+      { name: "Trvanlivé jedlo (min. 3 dni)", done: false, qty: "", expiry: "", link: "" },
+      { name: "Otvárač / varič / palivo", done: false, qty: "", expiry: "", link: "" },
+    ],
+    cash: [
+      { name: "Hotovosť na 3–7 dní", done: false, qty: "", expiry: "", link: "" },
+      { name: "Drobné mince", done: false, qty: "", expiry: "", link: "" },
+    ],
+    medkit: [
+      { name: "Lieky proti bolesti (Paralen, Ibuprofen)", done: false, qty: "", expiry: "", link: "" },
+      { name: "Obväzy, dezinfekcia, rukavice", done: false, qty: "", expiry: "", link: "" },
+      { name: "Lieky na predpis – záložná zásoba", done: false, qty: "", expiry: "", link: "" },
+    ],
+    hygiene: [
+      { name: "Toaletný papier / vlhčené utierky", done: false, qty: "", expiry: "", link: "" },
+      { name: "Mydlo / dezinfekcia rúk", done: false, qty: "", expiry: "", link: "" },
+    ],
+    gear: [
+      { name: "Baterka + záložné batérie", done: false, qty: "", expiry: "", link: "" },
+      { name: "Powerbanka (min. 10 000 mAh)", done: false, qty: "", expiry: "", link: "" },
+      { name: "Rádio na batérie", done: false, qty: "", expiry: "", link: "" },
+    ],
+    docs: [
+      { name: "Kópie dokladov (papier / USB)", done: false, qty: "", expiry: "", link: "" },
+      { name: "Zoznam kontaktov (offline)", done: false, qty: "", expiry: "", link: "" },
+    ],
+    plans: [
+      { name: "Miesto stretnutia – Plán A", done: false, qty: "", expiry: "", link: "" },
+      { name: "Záložné miesto – Plán B", done: false, qty: "", expiry: "", link: "" },
+      { name: "Evakuačná trasa – Plán C", done: false, qty: "", expiry: "", link: "" },
+    ],
+  };
 
-          // NORMÁLNE VYKRESLENIE PRE OSTATNÉ POLOŽKY
-          const exp = it.expiry ? daysUntil(it.expiry) : null;
-
-          const expBadge =
-            it.expiry
-              ? (exp < 0
-                ? `<span class="ml-2 text-xs px-2 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">EXPIROVANÉ</span>`
-                : (exp <= state.alertDays
-                  ? `<span class="ml-2 text-xs px-2 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">exp. za ${exp} dní</span>`
-                  : `<span class="ml-2 text-xs px-2 py-1 rounded-full bg-slate-50 text-slate-700 border border-slate-200">exp. za ${exp} dní</span>`))
-              : "";
-
-          const linkIcon = (it.link && isValidHttpUrl(it.link))
-            ? `<a href="${escapeHtml(it.link)}" target="_blank" rel="noopener noreferrer"
-                 class="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200"
-                 title="Otvoriť odporúčaný obchod">
-                 🔗
-               </a>`
-            : `<span class="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-slate-50 border border-slate-200 text-slate-300"
-                     title="Bez odkazu">↗</span>`;
-
-          const row = document.createElement("div");
-          row.className = "rounded-xl bg-white border border-slate-200 p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3 shadow-sm";
-          row.innerHTML = `
-            <div class="flex items-start gap-3">
-              <input type="checkbox" class="mt-1 h-5 w-5 accent-emerald-600" ${it.done ? "checked" : ""} data-toggle="${id}" />
-              <div>
-                <div class="font-semibold ${it.done ? "line-through text-slate-400" : ""}">
-                  ${escapeHtml(it.name)} ${expBadge}
-                </div>
-                <div class="text-sm text-slate-600 mt-1">
-                  ${it.qty ? `Množstvo: <span class="text-slate-900">${escapeHtml(it.qty)}</span>` : "—"}
-                  ${it.expiry ? ` • Expirácia: <span class="text-slate-900">${escapeHtml(it.expiry)}</span>` : ""}
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              ${linkIcon}
-              <button class="px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-sm" data-edit="${id}">Upraviť</button>
-              <button class="px-3 py-2 rounded-xl bg-rose-600 text-white hover:bg-rose-500 text-sm" data-del="${id}">Zmazať</button>
-            </div>
-          `;
-          list.appendChild(row);
-        });
-      }
-
-      wrap.appendChild(list);
-
-      $("categoryDetail").innerHTML = "";
-      $("categoryDetail").appendChild(wrap);
-
-      // set category bar color
-      const catBar = document.getElementById("catBar");
-      setBar(catBar, pct);
-
-      // bind actions
-      document.querySelectorAll("[data-toggle]").forEach(el => {
-        el.onchange = (e) => {
-          const key = e.target.getAttribute("data-toggle");
-          const [cid, idxStr] = key.split(":");
-          const idx = Number(idxStr);
-          state.items[cid][idx].done = e.target.checked;
-          saveState();
-          renderAll();
-        };
-      });
-
-      document.querySelectorAll("[data-del]").forEach(el => {
-        el.onclick = () => {
-          const key = el.getAttribute("data-del");
-          const [cid, idxStr] = key.split(":");
-          const idx = Number(idxStr);
-          state.items[cid].splice(idx, 1);
-          saveState();
-          renderAll();
-        };
-      });
-
-      document.querySelectorAll("[data-edit]").forEach(el => {
-        el.onclick = () => {
-          const key = el.getAttribute("data-edit");
-          const [cid, idxStr] = key.split(":");
-          const idx = Number(idxStr);
-          const item = state.items[cid][idx];
-
-          const name = prompt("Názov", item.name);
-          if (name === null) return;
-
-          const qty = prompt("Množstvo (napr. 10l / 5 ks)", item.qty || "") ?? item.qty;
-          const expiry = prompt("Expirácia (YYYY-MM-DD alebo prázdne)", item.expiry || "") ?? item.expiry;
-          const link = prompt("Odporúčaný odkaz (URL alebo prázdne)", item.link || "") ?? item.link;
-
-          item.name = name.trim() || item.name;
-          item.qty = (qty || "").trim();
-          item.expiry = (expiry || "").trim();
-          item.link = (link || "").trim();
-
-          saveState();
-          renderAll();
-        };
-      });
+  let state = {
+    profile: null,
+    selectedCategoryId: "food_water",
+    alertDays: 30,
+    items: structuredClone(DEFAULT_ITEMS),
+    plans: {
+      A: { message: "Sme v poriadku. Ideme na miesto A: _____.", phones: "" },
+      B: { message: "Presúvame sa na miesto B: _____.", phones: "" },
+      C: { message: "Evakuácia. Ideme na miesto C: _____.", phones: "" },
     }
+  };
 
-    function renderPlans() {
-      const box = $("plansBox");
-      box.innerHTML = "";
+  let currentUser = null;
+  let saveTimeout = null;
+  let syncStatus = "idle"; // idle | syncing | synced
 
-      ["A","B","C"].forEach(letter => {
-        const plan = state.plans[letter];
-        const card = document.createElement("div");
-        card.className = "rounded-xl bg-slate-50 border border-slate-200 p-3";
+  // ── Firestore helpers ────────────────────────────────────────────
+  function userDocRef(uid) { return doc(db, "users", uid, "data", "main"); }
+  function metaRef() { return doc(db, "meta", "stats"); }
 
-        card.innerHTML = `
-          <div class="flex items-center justify-between">
-            <div class="font-semibold">Plán ${letter}</div>
-            <button class="text-sm text-sky-700 hover:text-sky-800" data-editplan="${letter}">Upraviť</button>
-          </div>
-          <div class="text-sm text-slate-700 mt-2">
-            <div><span class="text-slate-500">Kontakty:</span> ${escapeHtml(plan.phones || "—")}</div>
-            <div class="mt-1"><span class="text-slate-500">Správa:</span> ${escapeHtml(plan.message)}</div>
-          </div>
-          <div class="mt-3 flex gap-2">
-            <button class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold" data-sms="${letter}">
-              Odoslať SMS
-            </button>
-            <button class="px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-sm" data-copy="${letter}">
-              Skopírovať text
-            </button>
-          </div>
-          <p class="mt-2 text-xs text-slate-500">Otvorí SMS aplikáciu (na mobile funguje najlepšie).</p>
-        `;
-        box.appendChild(card);
-      });
-
-      document.querySelectorAll("[data-editplan]").forEach(el => {
-        el.onclick = () => {
-          const letter = el.getAttribute("data-editplan");
-          const p = state.plans[letter];
-          const phones = prompt("Telefónne čísla (oddelené čiarkou)", p.phones || "");
-          if (phones === null) return;
-          const msg = prompt("Text správy", p.message || "");
-          if (msg === null) return;
-          state.plans[letter] = { phones: phones.trim(), message: msg.trim() };
-          saveState();
-          renderPlans();
+  async function loadUserData(uid) {
+    setSyncStatus("syncing");
+    try {
+      const snap = await getDoc(userDocRef(uid));
+      if (snap.exists()) {
+        const data = snap.data();
+        state = {
+          ...state,
+          ...data,
+          items: { ...structuredClone(DEFAULT_ITEMS), ...(data.items || {}) },
+          plans: { ...state.plans, ...(data.plans || {}) }
         };
-      });
-
-      document.querySelectorAll("[data-copy]").forEach(el => {
-        el.onclick = async () => {
-          const letter = el.getAttribute("data-copy");
-          const msg = state.plans[letter].message || "";
-          try {
-            await navigator.clipboard.writeText(msg);
-            alert("Text skopírovaný.");
-          } catch {
-            alert("Nepodarilo sa kopírovať. Skús manuálne.");
-          }
-        };
-      });
-
-      document.querySelectorAll("[data-sms]").forEach(el => {
-        el.onclick = () => {
-          const letter = el.getAttribute("data-sms");
-          const { phones, message } = state.plans[letter];
-          const list = parsePhones(phones);
-          if (!list.length) { alert("Doplň kontakty pre plán " + letter); return; }
-          const to = list.join(",");
-          const uri = "sms:" + encodeURIComponent(to) + "?&body=" + encodeURIComponent(message || "");
-          window.location.href = uri;
-        };
-      });
-    }
-
-    function renderAlerts() {
-      const box = $("alertsBox");
-      box.innerHTML = "";
-
-      const alertDays = Number(state.alertDays || 30);
-      const alerts = [];
-
-      for (const c of CATEGORIES) {
-        const items = state.items[c.id] || [];
-        items.forEach((it, idx) => {
-          if (!it.expiry) return;
-          const d = daysUntil(it.expiry);
-          if (d <= alertDays) {
-            alerts.push({
-              catId: c.id,
-              catName: c.name,
-              idx,
-              name: it.name,
-              qty: it.qty,
-              expiry: it.expiry,
-              days: d
-            });
-          }
-        });
+        // Migrate: ensure link field
+        for (const cid of Object.keys(state.items)) {
+          state.items[cid] = state.items[cid].map(it => ({ link: "", waterBottles: 0, isWaterItem: false, ...it }));
+        }
       }
+      setSyncStatus("synced");
+    } catch(e) {
+      console.error("Load error", e);
+      setSyncStatus("idle");
+    }
+  }
 
-      alerts.sort((a,b) => a.days - b.days);
+  async function saveUserData() {
+    if (!currentUser) return;
+    setSyncStatus("syncing");
+    try {
+      await setDoc(userDocRef(currentUser.uid), state);
+      setSyncStatus("synced");
+    } catch(e) {
+      console.error("Save error", e);
+      setSyncStatus("idle");
+    }
+  }
 
-      if (!alerts.length) {
-        box.innerHTML = `<p class="text-sm text-slate-600">Žiadne expirácie v najbližších ${alertDays} dňoch.</p>`;
+  function scheduleSave() {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(saveUserData, 1200);
+  }
+
+  function setSyncStatus(s) {
+    syncStatus = s;
+    const dot = document.getElementById("syncDot");
+    const lbl = document.getElementById("syncLabel");
+    if (!dot || !lbl) return;
+    dot.className = "sync-dot" + (s === "synced" ? " synced" : s === "syncing" ? " syncing" : "");
+    lbl.textContent = s === "synced" ? "Uložené" : s === "syncing" ? "Ukladám…" : "";
+  }
+
+  // ── Registration limit ───────────────────────────────────────────
+  async function registerNewUser(uid) {
+    try {
+      const result = await runTransaction(db, async (tx) => {
+        const meta = await tx.get(metaRef());
+        const count = meta.exists() ? (meta.data().registeredUsers || 0) : 0;
+        if (count >= MAX_USERS) throw new Error("LIMIT_REACHED");
+        tx.set(metaRef(), { registeredUsers: count + 1 }, { merge: true });
+        tx.set(userDocRef(uid), state);
+        return true;
+      });
+      return result;
+    } catch(e) {
+      if (e.message === "LIMIT_REACHED") return false;
+      throw e;
+    }
+  }
+
+  // ── Auth ─────────────────────────────────────────────────────────
+  document.getElementById("btnGoogleLogin").onclick = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+    } catch(e) {
+      const err = document.getElementById("loginError");
+      err.style.display = "block";
+      err.textContent = "Prihlásenie zlyhalo. Skús znova.";
+    }
+  };
+
+  document.getElementById("btnLogout").onclick = () => signOut(auth);
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      currentUser = null;
+      showScreen("login");
+      return;
+    }
+    currentUser = user;
+    // Check if user already has data
+    const snap = await getDoc(userDocRef(user.uid));
+    if (!snap.exists()) {
+      // New user – check limit
+      const ok = await registerNewUser(user.uid);
+      if (!ok) {
+        showScreen("closed");
+        await signOut(auth);
         return;
       }
-
-      alerts.slice(0, 8).forEach(a => {
-        const isExpired = a.days < 0;
-        const pill = isExpired
-          ? "bg-rose-50 border-rose-200 text-rose-700"
-          : "bg-amber-50 border-amber-200 text-amber-800";
-
-        const row = document.createElement("button");
-        row.className = `w-full text-left rounded-xl border p-3 bg-white hover:bg-slate-50 border-slate-200`;
-        row.innerHTML = `
-          <div class="flex items-start justify-between gap-2">
-            <div>
-              <div class="font-semibold">${escapeHtml(a.name)}</div>
-              <div class="text-xs text-slate-500 mt-1">${escapeHtml(a.catName)} • ${escapeHtml(a.expiry)} ${a.qty ? "• " + escapeHtml(a.qty) : ""}</div>
-            </div>
-            <span class="text-xs px-2 py-1 rounded-full border ${pill}">
-              ${isExpired ? "EXPIROVANÉ" : "za " + a.days + " dní"}
-            </span>
-          </div>
-        `;
-        row.onclick = () => {
-          state.selectedCategoryId = a.catId;
-          saveState();
-          renderAll();
-        };
-        box.appendChild(row);
-      });
+    } else {
+      await loadUserData(user.uid);
     }
 
-    function renderAll() {
-      renderProfileCard();
-      renderOverall();
-      renderCategories();
-      renderCategoryDetail();
-      renderPlans();
-      renderAlerts();
+    // Update avatar
+    const av = document.getElementById("userAvatar");
+    if (user.photoURL) {
+      av.innerHTML = `<img src="${user.photoURL}" alt="avatar">`;
+    } else {
+      av.textContent = (user.displayName || user.email || "U")[0].toUpperCase();
     }
 
-    // -------------------------
-    // Notifications (basic)
-    // -------------------------
-    function maybeNotify() {
-      if (!("Notification" in window)) return;
-      if (Notification.permission !== "granted") return;
-
-      const todayISO = new Date().toISOString().slice(0,10);
-      const alertDays = Number(state.alertDays || 30);
-
-      for (const c of CATEGORIES) {
-        const items = state.items[c.id] || [];
-        items.forEach((it, idx) => {
-          if (!it.expiry) return;
-          const d = daysUntil(it.expiry);
-          if (d > alertDays) return;
-
-          const key = itemId(c.id, idx);
-          if (state.notified[key] === todayISO) return;
-
-          const title = d < 0 ? "Expirácia – EXPIROVANÉ" : "Expirácia – blíži sa";
-          const body = `${it.name} (${c.name}) • ${it.expiry}${d < 0 ? "" : " • za " + d + " dní"}`;
-          new Notification(title, { body });
-
-          state.notified[key] = todayISO;
-        });
-      }
-      saveState();
-    }
-
-    // -------------------------
-    // Events
-    // -------------------------
-    $("btnEditProfile").onclick = () => openModal("modalProfile");
-    document.querySelectorAll("[data-close]").forEach(btn => { btn.onclick = () => closeModal(btn.getAttribute("data-close")); });
-
-    $("profileForm").onsubmit = (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-
-      state.profile = {
-        adults: Number(fd.get("adults") || 0),
-        kids: Number(fd.get("kids") || 0),
-        infants: Number(fd.get("infants") || 0),
-        seniors: Number(fd.get("seniors") || 0),
-        prepDays: Number(fd.get("prepDays") || 3),
-        readiness: String(fd.get("readiness") || "medium"),
-        housing: String(fd.get("housing") || "flat"),
-      };
-
-      if (state.profile.readiness === "high") {
-        if (!state.items.gear.find(x => x.name.includes("Náhradné svetlo"))) {
-          state.items.gear.push({ name: "Náhradné svetlo / čelovka", done: false, qty: "", expiry: "", link: "" });
-        }
-      }
-
-      saveState();
-      closeModal("modalProfile");
-      renderAll();
-    };
-
-    $("btnAddItem").onclick = () => openModal("modalAddItem");
-
-    $("addItemForm").onsubmit = (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      const name = String(fd.get("name") || "").trim();
-      const qty = String(fd.get("qty") || "").trim();
-      const expiry = String(fd.get("expiry") || "").trim();
-      const link = String(fd.get("link") || "").trim();
-
-      if (!name) return;
-
-      const cid = state.selectedCategoryId;
-      state.items[cid] = state.items[cid] || [];
-      state.items[cid].push({ name, qty, expiry, done: false, link });
-
-      saveState();
-      closeModal("modalAddItem");
-      e.target.reset();
-      renderAll();
-    };
-
-    $("alertDays").value = String(state.alertDays || 30);
-    $("alertDays").onchange = (e) => {
-      state.alertDays = Number(e.target.value);
-      saveState();
-      renderAlerts();
-      maybeNotify();
-    };
-
-    $("btnAskNotif").onclick = async () => {
-      if (!("Notification" in window)) { alert("Tento prehliadač nepodporuje notifikácie."); return; }
-      const perm = await Notification.requestPermission();
-      if (perm === "granted") {
-        alert("Notifikácie zapnuté. Upozornenia sa budú zobrazovať pri otvorenej stránke.");
-        maybeNotify();
-      } else {
-        alert("Notifikácie neboli povolené.");
-      }
-    };
-
-    $("btnReset").onclick = () => {
-      if (!confirm("Naozaj resetovať všetky dáta?")) return;
-      localStorage.removeItem(LS_KEY);
-      state = loadState();
-      renderAll();
-      openModal("modalProfile");
-    };
-
-    $("btnExport").onclick = () => {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "prepper-export.json";
-      a.click();
-      URL.revokeObjectURL(url);
-    };
-
-    $("fileImport").onchange = async (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      const text = await file.text();
-      try {
-        const imported = JSON.parse(text);
-        state = {
-          ...structuredClone(DEFAULT_STATE),
-          ...imported,
-          items: { ...structuredClone(DEFAULT_STATE.items), ...(imported.items || {}) },
-          plans: { ...structuredClone(DEFAULT_STATE.plans), ...(imported.plans || {}) }
-        };
-
-        // ensure link
-        for (const cid of Object.keys(state.items || {})) {
-          state.items[cid] = (state.items[cid] || []).map(it => ({ link: "", ...it }));
-        }
-
-        saveState();
-        renderAll();
-        alert("Import hotový.");
-      } catch {
-        alert("Nepodarilo sa importovať JSON.");
-      } finally {
-        e.target.value = "";
-      }
-    };
-
-    // -------------------------
-    // Boot
-    // -------------------------
+    showScreen("app");
     renderAll();
     if (!state.profile) openModal("modalProfile");
+  });
 
-    setInterval(() => { renderAlerts(); maybeNotify(); }, 60 * 1000);
-    maybeNotify();
-  </script>
+  function showScreen(name) {
+    document.getElementById("loginScreen").style.display = name === "login" ? "flex" : "none";
+    document.getElementById("closedScreen").style.display = name === "closed" ? "flex" : "none";
+    document.getElementById("appScreen").style.display = name === "app" ? "block" : "none";
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────
+  function esc(s) {
+    return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  function daysUntil(d) {
+    const ms = new Date(d + "T00:00:00") - new Date();
+    return Math.ceil(ms / 86400000);
+  }
+
+  function colorForPct(p) {
+    const h = p >= 100 ? 145 : p > 50 ? 80 : p > 25 ? 40 : 10;
+    return `hsl(${h} 70% 38%)`;
+  }
+
+  function rankForPct(p) {
+    if (p < 25) return "Otrhanec";
+    if (p < 50) return "Učeň";
+    if (p < 75) return "Strážca";
+    if (p < 100) return "Bojovník";
+    return "Rytier";
+  }
+
+  function emojiForPct(p) {
+    if (p < 25) return "😟";
+    if (p < 50) return "😐";
+    if (p < 75) return "🙂";
+    if (p < 100) return "😄";
+    return "🛡️";
+  }
+
+  function calcWaterCompletion(item) {
+    if (!item.isWaterItem || !state.profile) return item.done ? 100 : 0;
+    const p = state.profile;
+    const d = p.prepDays || 3;
+    const total = ((p.adults||0)*2 + (p.kids||0)*1.5 + (p.infants||0)*1 + (p.seniors||0)*2) * d;
+    if (!total) return 0;
+    return Math.min(100, ((item.waterBottles||0)*1.5 / total) * 100);
+  }
+
+  function categoryScore(catId) {
+    const items = state.items[catId] || [];
+    if (!items.length) return 0;
+    return items.reduce((sum, it) => sum + (it.isWaterItem ? calcWaterCompletion(it) : it.done ? 100 : 0), 0) / items.length;
+  }
+
+  function overallScore() {
+    const { sum, w } = CATEGORIES.reduce((acc, c) => ({
+      sum: acc.sum + categoryScore(c.id) * c.weight,
+      w: acc.w + c.weight
+    }), { sum: 0, w: 0 });
+    return w ? sum / w : 0;
+  }
+
+  function isValidUrl(u) {
+    try { const url = new URL(u); return url.protocol === "https:" || url.protocol === "http:"; } catch { return false; }
+  }
+
+  // ── Modal helpers ────────────────────────────────────────────────
+  function openModal(id) { document.getElementById(id).classList.add("open"); }
+  function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+  document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => closeModal(b.dataset.close));
+
+  // ── Render ───────────────────────────────────────────────────────
+  function renderProfileCard() {
+    const box = document.getElementById("profileCard");
+    if (!state.profile) {
+      box.innerHTML = `<p style="color:var(--c-muted); font-size:0.875rem;">Profil ešte nie je nastavený.</p>
+        <button class="btn-primary" style="margin-top:0.75rem;" onclick="document.getElementById('btnEditProfile').click()">Nastaviť</button>`;
+      return;
+    }
+    const p = state.profile;
+    const d = p.prepDays || 3;
+    const totalWater = ((p.adults||0)*2 + (p.kids||0)*1.5 + (p.infants||0)*1 + (p.seniors||0)*2) * d;
+    const housingMap = { flat: "Byt", rd: "Rodinný dom", rd_cellar: "RD + pivnica" };
+    box.innerHTML = `
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; font-size:0.8rem;">
+        <div style="background:var(--c-bg); border-radius:0.625rem; padding:0.5rem 0.625rem;">
+          <div style="color:var(--c-muted); font-size:0.7rem;">Osoby</div>
+          <div style="font-weight:600;">${(p.adults||0)+(p.kids||0)+(p.infants||0)+(p.seniors||0)} celkom</div>
+        </div>
+        <div style="background:var(--c-bg); border-radius:0.625rem; padding:0.5rem 0.625rem;">
+          <div style="color:var(--c-muted); font-size:0.7rem;">Príprava na</div>
+          <div style="font-weight:600;">${d} dní</div>
+        </div>
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:0.625rem; padding:0.5rem 0.625rem;">
+          <div style="color:#1e40af; font-size:0.7rem;">💧 Potreba vody</div>
+          <div style="font-weight:700; color:#1e3a8a;">${totalWater.toFixed(1)} L</div>
+        </div>
+        <div style="background:var(--c-bg); border-radius:0.625rem; padding:0.5rem 0.625rem;">
+          <div style="color:var(--c-muted); font-size:0.7rem;">Bývanie</div>
+          <div style="font-weight:600;">${housingMap[p.housing]||"–"}</div>
+        </div>
+      </div>`;
+  }
+
+  function renderOverall() {
+    const pct = overallScore();
+    document.getElementById("overallPct").textContent = Math.round(pct) + "%";
+    document.getElementById("overallRank").textContent = emojiForPct(pct) + " " + rankForPct(pct);
+    const bar = document.getElementById("overallBar");
+    bar.style.width = Math.min(100, pct) + "%";
+    bar.style.background = colorForPct(pct);
+  }
+
+  function renderCategories() {
+    const grid = document.getElementById("categoriesGrid");
+    grid.innerHTML = "";
+    for (const c of CATEGORIES) {
+      const pct = categoryScore(c.id);
+      const isSel = state.selectedCategoryId === c.id;
+      const card = document.createElement("div");
+      card.className = "cat-card" + (isSel ? " selected" : "");
+      const col = colorForPct(pct);
+      card.innerHTML = `
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.625rem;">
+          <div style="font-size:1.25rem;">${c.emoji}</div>
+          <span style="font-size:0.75rem; font-weight:700; color:${col};">${Math.round(pct)}%</span>
+        </div>
+        <div style="font-weight:600; font-size:0.875rem; margin-bottom:0.125rem;">${c.name}</div>
+        <div style="font-size:0.75rem; color:var(--c-muted); margin-bottom:0.625rem;">${rankForPct(pct)}</div>
+        <div class="progress-bar" style="height:5px;">
+          <div class="progress-fill" style="width:${Math.min(100,pct)}%; background:${col};"></div>
+        </div>`;
+      card.onclick = () => { state.selectedCategoryId = c.id; scheduleSave(); renderAll(); };
+      grid.appendChild(card);
+    }
+  }
+
+  function renderCategoryDetail() {
+    const catId = state.selectedCategoryId;
+    const cat = CATEGORIES.find(c => c.id === catId);
+    const items = state.items[catId] || [];
+    const pct = categoryScore(catId);
+    const detail = document.getElementById("categoryDetail");
+    detail.innerHTML = "";
+
+    const header = document.createElement("div");
+    header.style.cssText = "display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; padding-bottom:0.875rem; border-bottom:1px solid var(--c-border);";
+    header.innerHTML = `
+      <div>
+        <div style="font-size:1.125rem; font-weight:700;">${cat.emoji} ${cat.name}</div>
+        <div style="font-size:0.8rem; color:var(--c-muted); margin-top:0.125rem;">${items.filter(i=>!i.isWaterItem ? i.done : calcWaterCompletion(i)>=100).length} / ${items.length} hotovo</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-weight:700; color:${colorForPct(pct)};">${Math.round(pct)}%</div>
+        <div style="font-size:0.75rem; color:var(--c-muted);">${rankForPct(pct)}</div>
+      </div>`;
+    detail.appendChild(header);
+
+    const list = document.createElement("div");
+    list.style.cssText = "display:flex; flex-direction:column; gap:0.5rem;";
+
+    if (!items.length) {
+      list.innerHTML = `<p style="color:var(--c-muted); font-size:0.875rem;">Zatiaľ žiadne položky.</p>`;
+    } else {
+      items.forEach((it, idx) => {
+        if (it.isWaterItem && state.profile) {
+          const p = state.profile;
+          const d = p.prepDays || 3;
+          const total = ((p.adults||0)*2 + (p.kids||0)*1.5 + (p.infants||0)*1 + (p.seniors||0)*2) * d;
+          const current = (it.waterBottles||0) * 1.5;
+          const wpct = calcWaterCompletion(it);
+          const wCol = wpct >= 100 ? "var(--c-green)" : wpct >= 50 ? "#d97706" : "#dc2626";
+
+          const row = document.createElement("div");
+          row.className = "water-card";
+          row.innerHTML = `
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+              <div style="font-weight:700;">💧 ${esc(it.name)}</div>
+              <span style="font-size:1.125rem; font-weight:800; color:${wCol};">${Math.round(wpct)}%</span>
+            </div>
+            <div style="font-size:0.8rem; color:#1e40af; margin-bottom:0.75rem;">${current.toFixed(1)} L / ${total.toFixed(1)} L potrebných</div>
+            <div class="progress-bar" style="margin-bottom:0.75rem;">
+              <div class="progress-fill" style="width:${Math.min(100,wpct)}%; background:${wCol};"></div>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <label style="font-size:0.8rem; color:#1e40af; white-space:nowrap;">Fľaše 1.5 L:</label>
+              <input type="number" min="0" value="${it.waterBottles||0}" id="wb_${idx}" style="width:90px;" />
+              <span style="font-size:0.8rem; color:#1e40af;">${current.toFixed(1)} L</span>
+            </div>`;
+          list.appendChild(row);
+          setTimeout(() => {
+            const inp = document.getElementById(`wb_${idx}`);
+            if (inp) inp.onchange = () => {
+              state.items[catId][idx].waterBottles = Number(inp.value)||0;
+              scheduleSave(); renderAll();
+            };
+          }, 0);
+          return;
+        }
+
+        const exp = it.expiry ? daysUntil(it.expiry) : null;
+        const expBadge = it.expiry
+          ? (exp < 0 ? `<span class="badge badge-red">EXPIROVANÉ</span>`
+            : exp <= state.alertDays ? `<span class="badge badge-amber">za ${exp} dní</span>`
+            : `<span class="badge badge-gray">za ${exp} dní</span>`)
+          : "";
+        const linkBtn = (it.link && isValidUrl(it.link))
+          ? `<a href="${esc(it.link)}" target="_blank" rel="noopener" class="btn-ghost" style="padding:0.375rem 0.625rem; text-decoration:none;">🔗</a>`
+          : "";
+
+        const row = document.createElement("div");
+        row.className = "item-row";
+        row.innerHTML = `
+          <input type="checkbox" style="margin-top:2px; width:16px; height:16px; accent-color:var(--c-green); flex-shrink:0;" ${it.done?"checked":""} data-toggle="${catId}:${idx}" />
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:500; font-size:0.875rem; ${it.done?"text-decoration:line-through; color:var(--c-muted)":""}">${esc(it.name)} ${expBadge}</div>
+            <div style="font-size:0.75rem; color:var(--c-muted); margin-top:0.125rem;">${it.qty||"—"}${it.expiry ? " • " + it.expiry : ""}</div>
+          </div>
+          <div style="display:flex; gap:0.375rem; flex-shrink:0;">
+            ${linkBtn}
+            <button class="btn-ghost" style="padding:0.375rem 0.625rem; font-size:0.75rem;" data-edit="${catId}:${idx}">Upraviť</button>
+            <button class="btn-danger" style="padding:0.375rem 0.625rem;" data-del="${catId}:${idx}">✕</button>
+          </div>`;
+        list.appendChild(row);
+      });
+    }
+
+    detail.appendChild(list);
+
+    // Bind item actions
+    detail.querySelectorAll("[data-toggle]").forEach(el => {
+      el.onchange = () => {
+        const [cid, i] = el.dataset.toggle.split(":");
+        state.items[cid][+i].done = el.checked;
+        scheduleSave(); renderAll();
+      };
+    });
+    detail.querySelectorAll("[data-del]").forEach(el => {
+      el.onclick = () => {
+        const [cid, i] = el.dataset.del.split(":");
+        if (confirm("Odstrániť položku?")) { state.items[cid].splice(+i, 1); scheduleSave(); renderAll(); }
+      };
+    });
+    detail.querySelectorAll("[data-edit]").forEach(el => {
+      el.onclick = () => {
+        const [cid, i] = el.dataset.edit.split(":");
+        const item = state.items[cid][+i];
+        const name = prompt("Názov", item.name); if (name === null) return;
+        const qty = prompt("Množstvo", item.qty||"") ?? item.qty;
+        const expiry = prompt("Expirácia (YYYY-MM-DD)", item.expiry||"") ?? item.expiry;
+        const link = prompt("Odkaz (URL)", item.link||"") ?? item.link;
+        item.name = name.trim() || item.name;
+        item.qty = (qty||"").trim();
+        item.expiry = (expiry||"").trim();
+        item.link = (link||"").trim();
+        scheduleSave(); renderAll();
+      };
+    });
+  }
+
+  function renderPlans() {
+    const box = document.getElementById("plansBox");
+    box.innerHTML = "";
+    ["A","B","C"].forEach(letter => {
+      const plan = state.plans[letter];
+      const card = document.createElement("div");
+      card.style.cssText = "background:var(--c-bg); border:1px solid var(--c-border); border-radius:1rem; padding:1rem;";
+      card.innerHTML = `
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.625rem;">
+          <div style="font-weight:700; font-family:'Syne',sans-serif;">Plán ${letter}</div>
+          <button class="btn-ghost" style="font-size:0.75rem; padding:0.3rem 0.6rem;" data-editplan="${letter}">Upraviť</button>
+        </div>
+        <div style="font-size:0.8rem; color:var(--c-muted); margin-bottom:0.75rem; line-height:1.5;">
+          <div><strong>Kontakty:</strong> ${esc(plan.phones||"—")}</div>
+          <div><strong>Správa:</strong> ${esc(plan.message)}</div>
+        </div>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn-primary" style="font-size:0.8rem; padding:0.5rem 0.875rem; background:var(--c-green);" data-sms="${letter}">📱 SMS</button>
+          <button class="btn-ghost" style="font-size:0.8rem; padding:0.5rem 0.875rem;" data-copy="${letter}">Kopírovať</button>
+        </div>`;
+      box.appendChild(card);
+    });
+
+    box.querySelectorAll("[data-editplan]").forEach(el => {
+      el.onclick = () => {
+        const l = el.dataset.editplan;
+        const phones = prompt("Telefónne čísla (čiarkou)", state.plans[l].phones||""); if (phones===null) return;
+        const msg = prompt("Text správy", state.plans[l].message||""); if (msg===null) return;
+        state.plans[l] = { phones: phones.trim(), message: msg.trim() };
+        scheduleSave(); renderPlans();
+      };
+    });
+    box.querySelectorAll("[data-copy]").forEach(el => {
+      el.onclick = async () => {
+        await navigator.clipboard.writeText(state.plans[el.dataset.copy].message||"");
+        alert("Skopírované!");
+      };
+    });
+    box.querySelectorAll("[data-sms]").forEach(el => {
+      el.onclick = () => {
+        const p = state.plans[el.dataset.sms];
+        const phones = p.phones.split(",").map(s=>s.trim()).filter(Boolean);
+        if (!phones.length) { alert("Najprv doplň telefónne čísla."); return; }
+        window.location.href = `sms:${phones.join(",")}?&body=${encodeURIComponent(p.message||"")}`;
+      };
+    });
+  }
+
+  function renderAlerts() {
+    const alertDays = state.alertDays || 30;
+    const alerts = [];
+    for (const c of CATEGORIES) {
+      (state.items[c.id]||[]).forEach((it, idx) => {
+        if (!it.expiry) return;
+        const d = daysUntil(it.expiry);
+        if (d <= alertDays) alerts.push({ ...it, catName: c.name, catId: c.id, idx, days: d });
+      });
+    }
+    alerts.sort((a,b) => a.days - b.days);
+    const section = document.getElementById("alertsSection");
+    const box = document.getElementById("alertsBox");
+    if (!alerts.length) { section.style.display = "none"; return; }
+    section.style.display = "block";
+    box.innerHTML = alerts.slice(0,6).map(a => `
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:0.625rem 0; border-bottom:1px solid var(--c-border);">
+        <div>
+          <div style="font-weight:500; font-size:0.875rem;">${esc(a.name)}</div>
+          <div style="font-size:0.75rem; color:var(--c-muted);">${esc(a.catName)} • ${esc(a.expiry)}</div>
+        </div>
+        <span class="badge ${a.days < 0 ? 'badge-red' : 'badge-amber'}">${a.days < 0 ? 'EXPIROVANÉ' : 'za ' + a.days + ' dní'}</span>
+      </div>`).join("");
+  }
+
+  function renderAll() {
+    renderProfileCard();
+    renderOverall();
+    renderCategories();
+    renderCategoryDetail();
+    renderPlans();
+    renderAlerts();
+  }
+
+  // ── Forms ────────────────────────────────────────────────────────
+  document.getElementById("btnEditProfile").onclick = () => {
+    if (state.profile) {
+      const f = document.getElementById("profileForm");
+      Object.entries(state.profile).forEach(([k,v]) => {
+        const el = f.elements[k]; if (el) el.value = v;
+      });
+    }
+    openModal("modalProfile");
+  };
+
+  document.getElementById("profileForm").onsubmit = (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    state.profile = {
+      adults: +fd.get("adults")||0, kids: +fd.get("kids")||0,
+      infants: +fd.get("infants")||0, seniors: +fd.get("seniors")||0,
+      prepDays: +fd.get("prepDays")||3,
+      housing: String(fd.get("housing")), readiness: String(fd.get("readiness"))
+    };
+    closeModal("modalProfile");
+    scheduleSave(); renderAll();
+  };
+
+  document.getElementById("btnAddItem").onclick = () => openModal("modalAddItem");
+
+  document.getElementById("addItemForm").onsubmit = (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const name = String(fd.get("name")||"").trim();
+    if (!name) return;
+    const cid = state.selectedCategoryId;
+    state.items[cid] = state.items[cid] || [];
+    state.items[cid].push({ name, qty: String(fd.get("qty")||"").trim(), expiry: String(fd.get("expiry")||"").trim(), link: String(fd.get("link")||"").trim(), done: false });
+    closeModal("modalAddItem");
+    e.target.reset();
+    scheduleSave(); renderAll();
+  };
+
+  document.getElementById("alertDays").onchange = (e) => {
+    state.alertDays = +e.target.value;
+    scheduleSave(); renderAlerts();
+  };
+
+  // Click outside modal to close
+  document.querySelectorAll(".modal-overlay").forEach(overlay => {
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.classList.remove("open"); };
+  });
+</script>
 </body>
 </html>
