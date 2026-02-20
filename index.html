@@ -113,6 +113,7 @@
     .cat-card.selected {
       transform: translateY(-5px);
       box-shadow: 0 10px 28px rgba(0,0,0,0.14);
+      border-width: 3px;
     }
 
     .item-row {
@@ -945,9 +946,9 @@
         <div style="font-size:1.375rem; font-weight:800; letter-spacing:-0.01em;">${cat.emoji} ${cat.name}</div>
         <div style="font-size:0.8rem; color:var(--c-muted); margin-top:0.2rem;">${items.filter(i=>!i.isWaterItem ? i.done : calcWaterCompletion(i)>=100).length} / ${items.length} hotovo</div>
       </div>
-      <div style="text-align:right;">
-        <div style="font-size:1.75rem; font-weight:800; color:${colorForPct(pct)}; line-height:1;">${Math.round(pct)}%</div>
-        <div style="font-size:0.75rem; color:var(--c-muted); margin-top:0.2rem;">splnené na ${Math.round(pct)}%</div>
+      <div style="text-align:right; line-height:1.1;">
+        <div style="font-size:0.75rem; color:var(--c-muted); margin-bottom:0.2rem;">splnené na</div>
+        <div style="font-size:2rem; font-weight:800; color:${colorForPct(pct)}; letter-spacing:-0.03em;">${Math.round(pct)}%</div>
       </div>`;
     detail.appendChild(header);
 
