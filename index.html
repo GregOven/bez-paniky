@@ -368,46 +368,122 @@
       <h3 style="font-family:'Syne',sans-serif; font-weight:700; font-size:1.125rem;">Nastavenie domácnosti</h3>
       <button data-close="modalProfile" style="background:none;border:none;cursor:pointer;color:var(--c-muted);font-size:1.25rem;">✕</button>
     </div>
-    <form id="profileForm" style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
-      <div>
-        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Dospelí (13–64)</label>
-        <input name="adults" type="number" min="0" required />
+    <form id="profileForm" style="display:grid; gap:0.75rem;">
+
+      <!-- Počet osôb -->
+      <div style="background:var(--c-bg); border-radius:0.875rem; padding:0.875rem;">
+        <div style="font-size:0.8rem; font-weight:600; color:var(--c-text); margin-bottom:0.625rem;">👨‍👩‍👧‍👦 Počet osôb v domácnosti</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.625rem;">
+          <div>
+            <label style="font-size:0.75rem; color:var(--c-muted); display:block; margin-bottom:0.3rem;">Dospelí (13–64)</label>
+            <input name="adults" type="number" min="0" value="0"
+              onfocus="if(this.value==='0')this.value=''"
+              onblur="if(this.value==='')this.value='0'" />
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--c-muted); display:block; margin-bottom:0.3rem;">Deti (1–12)</label>
+            <input name="kids" type="number" min="0" value="0"
+              onfocus="if(this.value==='0')this.value=''"
+              onblur="if(this.value==='')this.value='0'" />
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--c-muted); display:block; margin-bottom:0.3rem;">Dojčatá (0–1)</label>
+            <input name="infants" type="number" min="0" value="0"
+              onfocus="if(this.value==='0')this.value=''"
+              onblur="if(this.value==='')this.value='0'" />
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--c-muted); display:block; margin-bottom:0.3rem;">Seniori (65+)</label>
+            <input name="seniors" type="number" min="0" value="0"
+              onfocus="if(this.value==='0')this.value=''"
+              onblur="if(this.value==='')this.value='0'" />
+          </div>
+        </div>
       </div>
-      <div>
-        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Deti (1–12)</label>
-        <input name="kids" type="number" min="0" required />
+
+      <!-- Doba pripravenosti -->
+      <div style="background:var(--c-bg); border-radius:0.875rem; padding:0.875rem;">
+        <div style="font-size:0.8rem; font-weight:600; color:var(--c-text); margin-bottom:0.375rem;">📅 Doba pripravenosti</div>
+        <input name="prepDays" type="number" min="1" max="30" value="3"
+          onfocus="if(this.value==='3' && !this._touched)this.value=''"
+          onblur="if(this.value===''){this.value='3'} this._touched=true;" />
+        <p style="font-size:0.75rem; color:var(--c-muted); margin-top:0.375rem;">Minimum: 3 dni &nbsp;•&nbsp; Odporúčané: 7–14 dní</p>
       </div>
-      <div>
-        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Dojčatá (0–1)</label>
-        <input name="infants" type="number" min="0" required />
+
+      <!-- 3 nastavenia vedľa seba -->
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.625rem;">
+
+        <!-- Úroveň pripravenosti -->
+        <div style="background:var(--c-bg); border-radius:0.875rem; padding:0.875rem;">
+          <div style="font-size:0.75rem; font-weight:600; color:var(--c-text); margin-bottom:0.5rem;">🛡️ Úroveň</div>
+          <label class="radio-option" style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.625rem; border-radius:0.625rem; border:1.5px solid var(--c-border); background:white; cursor:pointer; margin-bottom:0.375rem; font-size:0.8rem;">
+            <input type="radio" name="readiness" value="standard" style="accent-color:var(--c-accent);" />
+            <span>
+              <strong>Odporúčaná</strong><br>
+              <span style="font-size:0.7rem; color:var(--c-muted);">Podľa príručiek</span>
+            </span>
+          </label>
+          <label class="radio-option" style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.625rem; border-radius:0.625rem; border:1.5px solid var(--c-border); background:white; cursor:pointer; font-size:0.8rem;">
+            <input type="radio" name="readiness" value="enhanced" style="accent-color:var(--c-accent);" />
+            <span>
+              <strong>Zvýšená</strong><br>
+              <span style="font-size:0.7rem; color:var(--c-muted);">+30% zásoby</span>
+            </span>
+          </label>
+        </div>
+
+        <!-- Nákladovosť -->
+        <div style="background:var(--c-bg); border-radius:0.875rem; padding:0.875rem;">
+          <div style="font-size:0.75rem; font-weight:600; color:var(--c-text); margin-bottom:0.5rem;">💰 Nákladovosť</div>
+          <label style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.625rem; border-radius:0.625rem; border:1.5px solid var(--c-border); background:white; cursor:pointer; margin-bottom:0.375rem; font-size:0.8rem;">
+            <input type="radio" name="budget" value="basic" style="accent-color:var(--c-accent);" />
+            <span>
+              <strong>Úsporná</strong><br>
+              <span style="font-size:0.7rem; color:var(--c-muted);">Minimum nákladov</span>
+            </span>
+          </label>
+          <label style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.625rem; border-radius:0.625rem; border:1.5px solid var(--c-border); background:white; cursor:pointer; margin-bottom:0.375rem; font-size:0.8rem;">
+            <input type="radio" name="budget" value="mid" style="accent-color:var(--c-accent);" />
+            <span>
+              <strong>Stredná</strong><br>
+              <span style="font-size:0.7rem; color:var(--c-muted);">Dobrý pomer</span>
+            </span>
+          </label>
+          <label style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.625rem; border-radius:0.625rem; border:1.5px solid var(--c-border); background:white; cursor:pointer; font-size:0.8rem;">
+            <input type="radio" name="budget" value="premium" style="accent-color:var(--c-accent);" />
+            <span>
+              <strong>Prémiová</strong><br>
+              <span style="font-size:0.7rem; color:var(--c-muted);">Bez kompromisov</span>
+            </span>
+          </label>
+        </div>
+
+        <!-- Typ bývania -->
+        <div style="background:var(--c-bg); border-radius:0.875rem; padding:0.875rem;">
+          <div style="font-size:0.75rem; font-weight:600; color:var(--c-text); margin-bottom:0.5rem;">🏠 Bývanie</div>
+          <label style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.625rem; border-radius:0.625rem; border:1.5px solid var(--c-border); background:white; cursor:pointer; margin-bottom:0.375rem; font-size:0.8rem;">
+            <input type="radio" name="housing" value="flat" style="accent-color:var(--c-accent);" />
+            <span>
+              <strong>Byt</strong>
+            </span>
+          </label>
+          <label style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.625rem; border-radius:0.625rem; border:1.5px solid var(--c-border); background:white; cursor:pointer; margin-bottom:0.375rem; font-size:0.8rem;">
+            <input type="radio" name="housing" value="rd" style="accent-color:var(--c-accent);" />
+            <span>
+              <strong>Rodinný dom</strong>
+            </span>
+          </label>
+          <label style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.625rem; border-radius:0.625rem; border:1.5px solid var(--c-border); background:white; cursor:pointer; font-size:0.8rem;">
+            <input type="radio" name="housing" value="rd_cellar" style="accent-color:var(--c-accent);" />
+            <span>
+              <strong>RD + pivnica</strong>
+            </span>
+          </label>
+        </div>
       </div>
-      <div>
-        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Seniori (65+)</label>
-        <input name="seniors" type="number" min="0" required />
-      </div>
-      <div style="grid-column:1/-1;">
-        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Počet dní pripravenosti</label>
-        <input name="prepDays" type="number" min="1" max="30" value="3" required />
-        <p style="font-size:0.75rem; color:var(--c-muted); margin-top:0.25rem;">Min. 3 dni. Odporúčané: 7–14 dní.</p>
-      </div>
-      <div>
-        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Typ bývania</label>
-        <select name="housing">
-          <option value="flat">Byt</option>
-          <option value="rd">Rodinný dom</option>
-          <option value="rd_cellar">RD + pivnica</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:0.8rem; color:var(--c-muted); display:block; margin-bottom:0.375rem;">Úroveň pripravenosti</label>
-        <select name="readiness">
-          <option value="minimal">Minimálna</option>
-          <option value="medium" selected>Stredná</option>
-          <option value="high">Vysoká</option>
-        </select>
-      </div>
-      <div style="grid-column:1/-1; display:flex; justify-content:flex-end; padding-top:0.5rem;">
-        <button type="submit" class="btn-primary" style="padding:0.75rem 2rem;">Uložiť</button>
+
+      <div style="display:flex; justify-content:flex-end; padding-top:0.5rem;">
+        <button type="submit" class="btn-primary" style="padding:0.75rem 2rem;">Uložiť profil</button>
       </div>
     </form>
   </div>
@@ -693,7 +769,8 @@
     if (!item.isWaterItem || !state.profile) return item.done ? 100 : 0;
     const p = state.profile;
     const d = p.prepDays || 3;
-    const total = ((p.adults||0)*2 + (p.kids||0)*1.5 + (p.infants||0)*1 + (p.seniors||0)*2) * d;
+    const coeff = p.readinessCoeff || 1.0;
+    const total = ((p.adults||0)*2 + (p.kids||0)*1.5 + (p.infants||0)*1 + (p.seniors||0)*2) * d * coeff;
     if (!total) return 0;
     return Math.min(100, ((item.waterBottles||0)*1.5 / total) * 100);
   }
@@ -731,25 +808,37 @@
     }
     const p = state.profile;
     const d = p.prepDays || 3;
-    const totalWater = ((p.adults||0)*2 + (p.kids||0)*1.5 + (p.infants||0)*1 + (p.seniors||0)*2) * d;
+    const coeff = p.readinessCoeff || 1.0;
+    const totalWater = ((p.adults||0)*2 + (p.kids||0)*1.5 + (p.infants||0)*1 + (p.seniors||0)*2) * d * coeff;
     const housingMap = { flat: "Byt", rd: "Rodinný dom", rd_cellar: "RD + pivnica" };
+    const readinessMap = { standard: "Odporúčaná", enhanced: "Zvýšená (+30%)" };
+    const budgetMap = { basic: "Úsporná", mid: "Stredná", premium: "Prémiová" };
+    const budgetColor = { basic: "#6b7280", mid: "#b45309", premium: "#7c3aed" };
     box.innerHTML = `
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; font-size:0.8rem;">
         <div style="background:var(--c-bg); border-radius:0.625rem; padding:0.5rem 0.625rem;">
-          <div style="color:var(--c-muted); font-size:0.7rem;">Osoby</div>
-          <div style="font-weight:600;">${(p.adults||0)+(p.kids||0)+(p.infants||0)+(p.seniors||0)} celkom</div>
+          <div style="color:var(--c-muted); font-size:0.7rem;">Osoby celkom</div>
+          <div style="font-weight:600;">${(p.adults||0)+(p.kids||0)+(p.infants||0)+(p.seniors||0)}</div>
         </div>
         <div style="background:var(--c-bg); border-radius:0.625rem; padding:0.5rem 0.625rem;">
           <div style="color:var(--c-muted); font-size:0.7rem;">Príprava na</div>
           <div style="font-weight:600;">${d} dní</div>
         </div>
-        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:0.625rem; padding:0.5rem 0.625rem;">
-          <div style="color:#1e40af; font-size:0.7rem;">💧 Potreba vody</div>
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:0.625rem; padding:0.5rem 0.625rem; grid-column:1/-1;">
+          <div style="color:#1e40af; font-size:0.7rem;">💧 Potreba vody${coeff > 1 ? ' (zvýšená)' : ''}</div>
           <div style="font-weight:700; color:#1e3a8a;">${totalWater.toFixed(1)} L</div>
         </div>
         <div style="background:var(--c-bg); border-radius:0.625rem; padding:0.5rem 0.625rem;">
-          <div style="color:var(--c-muted); font-size:0.7rem;">Bývanie</div>
+          <div style="color:var(--c-muted); font-size:0.7rem;">🏠 Bývanie</div>
           <div style="font-weight:600;">${housingMap[p.housing]||"–"}</div>
+        </div>
+        <div style="background:var(--c-bg); border-radius:0.625rem; padding:0.5rem 0.625rem;">
+          <div style="color:var(--c-muted); font-size:0.7rem;">🛡️ Úroveň</div>
+          <div style="font-weight:600;">${readinessMap[p.readiness]||"–"}</div>
+        </div>
+        <div style="background:var(--c-bg); border-radius:0.625rem; padding:0.5rem 0.625rem; grid-column:1/-1;">
+          <div style="color:var(--c-muted); font-size:0.7rem;">💰 Nákladovosť</div>
+          <div style="font-weight:600; color:${budgetColor[p.budget]||"#6b7280"};">${budgetMap[p.budget]||"–"}</div>
         </div>
       </div>`;
   }
@@ -994,11 +1083,29 @@
 
   // ── Forms ────────────────────────────────────────────────────────
   document.getElementById("btnEditProfile").onclick = () => {
+    const f = document.getElementById("profileForm");
     if (state.profile) {
-      const f = document.getElementById("profileForm");
-      Object.entries(state.profile).forEach(([k,v]) => {
-        const el = f.elements[k]; if (el) el.value = v;
+      const p = state.profile;
+      // Číselné polia
+      ["adults","kids","infants","seniors","prepDays"].forEach(k => {
+        if (f.elements[k]) f.elements[k].value = p[k] ?? (k === "prepDays" ? 3 : 0);
       });
+      // Radio polia
+      ["readiness","budget","housing"].forEach(k => {
+        const val = p[k];
+        if (val) {
+          const radio = f.querySelector(`input[name="${k}"][value="${val}"]`);
+          if (radio) radio.checked = true;
+        }
+      });
+    } else {
+      // Defaultné hodnoty pre nový profil
+      const defReadiness = f.querySelector('input[name="readiness"][value="standard"]');
+      if (defReadiness) defReadiness.checked = true;
+      const defBudget = f.querySelector('input[name="budget"][value="mid"]');
+      if (defBudget) defBudget.checked = true;
+      const defHousing = f.querySelector('input[name="housing"][value="flat"]');
+      if (defHousing) defHousing.checked = true;
     }
     openModal("modalProfile");
   };
@@ -1006,11 +1113,21 @@
   document.getElementById("profileForm").onsubmit = (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
+
+    // Koeficient pre zvýšenú pripravenosť
+    const readiness = String(fd.get("readiness") || "standard");
+    const readinessCoeff = readiness === "enhanced" ? 1.3 : 1.0;
+
     state.profile = {
-      adults: +fd.get("adults")||0, kids: +fd.get("kids")||0,
-      infants: +fd.get("infants")||0, seniors: +fd.get("seniors")||0,
-      prepDays: +fd.get("prepDays")||3,
-      housing: String(fd.get("housing")), readiness: String(fd.get("readiness"))
+      adults:   +fd.get("adults")   || 0,
+      kids:     +fd.get("kids")     || 0,
+      infants:  +fd.get("infants")  || 0,
+      seniors:  +fd.get("seniors")  || 0,
+      prepDays: +fd.get("prepDays") || 3,
+      housing:  String(fd.get("housing")  || "flat"),
+      readiness,
+      readinessCoeff,
+      budget:   String(fd.get("budget")   || "mid"),
     };
     closeModal("modalProfile");
     scheduleSave(); renderAll();
