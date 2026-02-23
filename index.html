@@ -240,7 +240,151 @@
     @media (max-width: 640px) {
       .modal-box { border-radius: 1rem; }
     }
-  </style>
+
+    /* ═══════════════════════════════════════════
+       MOBILNÁ RESPONZIVITA
+    ═══════════════════════════════════════════ */
+
+    /* Základné mobile úpravy */
+    @media (max-width: 640px) {
+
+      /* Header */
+      .app-header {
+        padding: 0 1rem;
+        height: 52px;
+      }
+      .app-header-logo span {
+        font-size: 0.9375rem !important;
+      }
+
+      /* Hlavný obsah */
+      .app-main-padding {
+        padding: 1rem 0.75rem !important;
+      }
+
+      /* Profile + Overall - stack na mobile */
+      .top-row-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Kategórie - 2 stĺpce na mobile */
+      .categories-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.5rem !important;
+      }
+
+      /* Plány - 1 stĺpec */
+      .plans-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Profil karta - 2x2 grid */
+      .profile-stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+      }
+
+      /* Buttons v header detail */
+      .detail-header-row {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      /* Item riadky - tlačidlá menšie */
+      .item-row {
+        padding: 0.75rem 0.75rem !important;
+      }
+
+      /* Modal - full screen na mobile */
+      .modal-box {
+        border-radius: 1.25rem 1.25rem 0 0 !important;
+        max-height: 92vh !important;
+        margin-top: auto !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .modal-overlay {
+        align-items: flex-end !important;
+        padding: 0 !important;
+      }
+
+      /* Profil modal - 3 stĺpce -> 1 stĺpec */
+      .profile-3col {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Osoby - 2x2 na mobile */
+      .persons-grid {
+        grid-template-columns: 1fr 1fr !important;
+      }
+
+      /* Dni sebestačnosti - stack */
+      .prepdays-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.625rem !important;
+      }
+      .prepdays-row input {
+        width: 100% !important;
+      }
+
+      /* Water card grid */
+      .water-info-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Cat card - menší padding */
+      .cat-card {
+        padding: 0.75rem !important;
+      }
+
+      /* Sync indicator - skryť text na mobile */
+      .sync-label-text {
+        display: none;
+      }
+    }
+
+
+    @media (max-width: 640px) {
+      /* Item row tlačidlá - len ikony na mobile */
+      .item-btn-edit { font-size: 0.75rem !important; padding: 0.375rem 0.5rem !important; }
+      .item-btn-del { padding: 0.375rem 0.5rem !important; }
+
+      /* Profil karta - full width water box */
+      .profile-water-full { grid-column: 1 / -1 !important; }
+
+      /* Výstraha sekcia */
+      .alerts-header { flex-wrap: wrap; gap: 0.5rem; }
+
+      /* Nadpis Kategórie */
+      .cats-heading { font-size: 1.1rem !important; }
+
+      /* Overall % číslo menšie */
+      #overallPct { font-size: 1.6rem !important; }
+
+      /* Plán karty - zmenšiť padding */
+      .plan-card { padding: 0.875rem !important; }
+
+      /* Adjust app header for very small screens */
+      #btnLogout { display: none; }
+      .user-avatar { cursor: pointer; }
+    }
+    /* Stredné obrazovky - tablet */
+    @media (min-width: 641px) and (max-width: 900px) {
+      .top-row-grid {
+        grid-template-columns: 1fr 1fr !important;
+      }
+      .categories-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+      }
+      .profile-3col {
+        grid-template-columns: 1fr 1fr !important;
+      }
+    }
+      </style>
 </head>
 <body>
 
@@ -302,7 +446,7 @@
     <div style="display:flex; align-items:center; gap:1rem;">
       <span class="sync-indicator">
         <span class="sync-dot" id="syncDot"></span>
-        <span id="syncLabel">–</span>
+        <span id="syncLabel" class="sync-label-text">–</span>
       </span>
       <div style="display:flex; align-items:center; gap:0.5rem;">
         <div class="user-avatar" id="userAvatar">?</div>
@@ -311,11 +455,11 @@
     </div>
   </header>
 
-  <div style="max-width:1100px; margin:0 auto; padding:1.5rem 1rem;">
+  <div class="app-main-padding" style="max-width:1100px; margin:0 auto; padding:1.5rem 1rem;">
     <div style="display:grid; grid-template-columns:1fr; gap:1rem;">
 
       <!-- Top row: Profile + Overall Score -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+      <div class="top-row-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
 
         <!-- Profile Card -->
         <div class="card">
@@ -361,12 +505,12 @@
       <!-- Categories Grid -->
       <div>
         <h2 style="font-family:'Lexend',sans-serif; font-weight:700; font-size:1.275rem; margin-bottom:0.75rem;">Kategórie</h2>
-        <div id="categoriesGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:0.75rem;"></div>
+        <div id="categoriesGrid" class="categories-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:0.75rem;"></div>
       </div>
 
       <!-- Category Detail -->
       <div class="card">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+        <div class="detail-header-row" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
           <h2 style="font-size:1.2rem; font-weight:700;">Detail kategórie</h2>
           <button class="btn-primary" id="btnAddItem">+ Pridať položku</button>
         </div>
@@ -376,7 +520,7 @@
       <!-- Plans -->
       <div class="card">
         <h2 style="font-size:1.2rem; font-weight:700; margin-bottom:0.875rem;">📋 Núdzové plány</h2>
-        <div id="plansBox" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:0.75rem;"></div>
+        <div id="plansBox" class="plans-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:0.75rem;"></div>
       </div>
 
     </div>
@@ -399,7 +543,7 @@
       <!-- Počet osôb -->
       <div style="background:var(--c-bg); border-radius:1rem; padding:1rem;">
         <div style="font-size:0.8rem; font-weight:700; color:var(--c-text); margin-bottom:0.75rem;">👨‍👩‍👧‍👦 Počet osôb v domácnosti <span style="font-size:0.68rem; font-weight:400; color:var(--c-muted);">(ovplyvňuje niektoré špecifické odporúčania)</span></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:0.625rem;">
+        <div class="persons-grid" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:0.625rem;">
           <div>
             <label style="font-size:0.72rem; color:var(--c-muted); display:block; margin-bottom:0.3rem; white-space:nowrap;">Dospelí (13–64)</label>
             <input name="adults" type="number" min="0" value="0"
@@ -428,7 +572,7 @@
       </div>
 
       <!-- Počet dní sebestačnosti -->
-      <div style="background:var(--c-bg); border-radius:1rem; padding:1rem; display:flex; align-items:center; gap:1rem;">
+      <div class="prepdays-row" style="background:var(--c-bg); border-radius:1rem; padding:1rem; display:flex; align-items:center; gap:1rem;">
         <div style="flex:1;">
           <div style="font-size:0.8rem; font-weight:700; color:var(--c-text);">📅 Počet dní sebestačnosti</div>
           <div style="font-size:0.75rem; color:var(--c-muted); margin-top:0.2rem;">Minimum 3 dni. Pre väčší pocit istoty odporúčame 7 dní.</div>
@@ -440,7 +584,7 @@
       </div>
 
       <!-- Úroveň + Nákladovosť + Bývanie -->
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.75rem; align-items:start;">
+      <div class="profile-3col" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.75rem; align-items:start;">
 
         <!-- Úroveň pripravenosti -->
         <div style="background:var(--c-bg); border-radius:1rem; padding:1rem;">
@@ -999,7 +1143,7 @@
               <span style="font-size:0.95rem; font-weight:700; color:${wCol}; flex-shrink:0;">${Math.round(wpct)}%</span>
             </div>
 
-            <div style="display:grid; grid-template-columns:1fr auto; gap:0.625rem; margin-bottom:0.875rem; align-items:stretch;">
+            <div class="water-info-grid" style="display:grid; grid-template-columns:1fr auto; gap:0.625rem; margin-bottom:0.875rem; align-items:stretch;">
               <div style="background:rgba(255,255,255,0.7); border-radius:0.625rem; padding:0.625rem 0.75rem;">
                 <div style="font-size:0.7rem; color:#3b82f6; font-weight:600; margin-bottom:0.2rem; text-transform:uppercase; letter-spacing:0.04em;">Zásoby</div>
                 <div style="font-size:0.9rem; font-weight:700; color:#1e3a8a;">${litreSklon(current)}</div>
@@ -1052,8 +1196,8 @@
           </div>
           <div style="display:flex; gap:0.375rem; flex-shrink:0;">
             ${linkBtn}
-            <button class="btn-ghost" style="padding:0.375rem 0.625rem; font-size:0.75rem;" data-edit="${catId}:${idx}">Upraviť</button>
-            <button class="btn-danger" style="padding:0.375rem 0.625rem;" data-del="${catId}:${idx}">✕</button>
+            <button class="btn-ghost item-btn-edit" style="padding:0.375rem 0.625rem; font-size:0.75rem;" data-edit="${catId}:${idx}">Upraviť</button>
+            <button class="btn-danger item-btn-del" style="padding:0.375rem 0.625rem;" data-del="${catId}:${idx}">✕</button>
           </div>`;
         list.appendChild(row);
       });
