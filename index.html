@@ -777,17 +777,22 @@
     ],
   };
 
-  let state = {
-    profile: null,
-    selectedCategoryId: "food_water",
-    alertDays: 30,
-    items: structuredClone(DEFAULT_ITEMS),
-    plans: {
-      A: { message: "Sme v poriadku. Ideme na miesto A: _____.", phones: "" },
-      B: { message: "Presúvame sa na miesto B: _____.", phones: "" },
-      C: { message: "Evakuácia. Ideme na miesto C: _____.", phones: "" },
-    }
-  };
+  // Funkcia na vytvorenie čistého state - vždy volať pri novom prihlásení
+  function freshState() {
+    return {
+      profile: null,
+      selectedCategoryId: "food_water",
+      alertDays: 30,
+      items: structuredClone(DEFAULT_ITEMS),
+      plans: {
+        A: { message: "Sme v poriadku. Ideme na miesto A: _____.", phones: "" },
+        B: { message: "Presúvame sa na miesto B: _____.", phones: "" },
+        C: { message: "Evakuácia. Ideme na miesto C: _____.", phones: "" },
+      }
+    };
+  }
+
+  let state = freshState();
 
   let currentUser = null;
   let saveTimeout = null;
@@ -855,7 +860,7 @@
         const count = meta.exists() ? (meta.data().registeredUsers || 0) : 0;
         if (count >= MAX_USERS) throw new Error("LIMIT_REACHED");
         tx.set(metaRef(), { registeredUsers: count + 1 }, { merge: true });
-        tx.set(userDocRef(uid), state);
+        tx.set(userDocRef(uid), freshState());
         return true;
       });
       return result;
@@ -882,10 +887,14 @@
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       currentUser = null;
+      // Reset state pri odhlásení - žiadne dáta nezostanú v pamäti
+      state = freshState();
       showScreen("login");
       return;
     }
     currentUser = user;
+    // Vždy začneme s čistým state pred načítaním dát z Firestore
+    state = freshState();
     // Check if user already has data
     const snap = await getDoc(userDocRef(user.uid));
     if (!snap.exists()) {
